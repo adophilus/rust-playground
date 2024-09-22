@@ -1,0 +1,9 @@
+[toolchain]
+channel = "nightly"
+# components = [ "rustfmt", "rustc-dev" ]
+components = ["rust-src"]
+targets = ["wasm32-unknown-unknown"]
+# targets = ["thumbv2-none-eabi"]
+# targets = [ "avr-atmega328p" ]
+# targets = [ "avr-unknown-gnu-atmega328" ]
+profile = "minimal"
