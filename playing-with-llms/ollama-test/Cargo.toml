@@ -1,0 +1,11 @@
+[package]
+name = "ollama-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+derive_more = { version = "1.0.0", features = ["from"] }
+futures = "0.3.31"
+ollama-rs = "0.2.1"
+simple-fs = "0.1.5"
+tokio = { version = "1.40.0", features = ["full"] }
