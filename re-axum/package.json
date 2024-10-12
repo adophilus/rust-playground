@@ -1,0 +1,16 @@
+{
+	"name": "axum-on-vercel",
+	"module": "build.ts",
+	"type": "module",
+	"scripts": {
+		"build": "cargo build --release --target=x86_64-unknown-linux-musl",
+		"deploy": "bun vercel deploy --prebuilt"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"vercel": "^37.4.2"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}
