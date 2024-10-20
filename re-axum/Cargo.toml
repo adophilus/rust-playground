@@ -14,6 +14,7 @@ tower = "0.4.13"
 tower-http = { version = "0.5.2", features = ["trace"] }
 tower-service = "0.3.3"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+vercel_axum = "1.1.4"
 vercel_runtime = "1.1.4"
 
 [build]

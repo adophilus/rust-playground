@@ -137,21 +137,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-on-vercel"
-version = "0.0.1"
-dependencies = [
- "axum",
- "rand",
- "serde_json",
- "tokio",
- "tower",
- "tower-http",
- "tower-service",
- "tracing-subscriber",
- "vercel_runtime",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -775,6 +760,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "re-axum"
+version = "0.0.1"
+dependencies = [
+ "axum",
+ "rand",
+ "serde_json",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tower-service",
+ "tracing-subscriber",
+ "vercel_axum",
+ "vercel_runtime",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1210,6 +1211,21 @@ name = "valuable"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
+
+[[package]]
+name = "vercel_axum"
+version = "1.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "909e874c812dc3c64fc8dfd6b5d3d477fb1c6067bab9ba69dd6669ad2ae370fe"
+dependencies = [
+ "axum",
+ "base64",
+ "http-body-util",
+ "serde_json",
+ "tower",
+ "tower-service",
+ "vercel_runtime",
+]
 
 [[package]]
 name = "vercel_runtime"

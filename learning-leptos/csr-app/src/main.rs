@@ -9,13 +9,14 @@ fn main() {
 
 #[component]
 pub fn App() -> impl IntoView {
+    let (count, set_count) = create_signal(0);
+
     view! {
-        <textarea
-            prop:value=move || some_value.get()
-            on:input=/* etc */
-        >
-            /* plain-text initial value, does not change if the signal changes */
-            {some_value.get_untracked()}
-        </textarea>
+        <button on:click=move |_| {
+            set_count.update(|c| *c += 1)
+        }>
+        "Click me: "
+        {move || count()}
+        </button>
     }
 }

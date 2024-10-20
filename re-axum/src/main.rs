@@ -1,4 +1,4 @@
-use axum::{extract::Path, response::IntoResponse, routing::get, Router};
+use axum::{extract::Path, response::IntoResponse, routing::get, Json, Router};
 use serde_json::json;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
@@ -8,8 +8,8 @@ use vercel_runtime::{
     ServiceBuilder, StatusCode,
 };
 mod utils;
-use utils::LambdaLayer;
 
+#[derive(Clone)]
 struct AppContext {
     base_name: String,
 }
@@ -30,7 +30,8 @@ fn init_tracing() {
 }
 
 async fn get_index_route() -> impl IntoResponse {
-    "Welcome to the api"
+    let pokemon = choose_starter();
+    Json(json!({ "message": format!("I choose you, {}!", pokemon) }))
 }
 
 async fn get_greeting(Path(name): Path<String>) -> impl IntoResponse {
@@ -53,40 +54,19 @@ pub fn choose_starter() -> String {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    run(handler).await
+    init_tracing();
+
+    let ctx = Arc::new(AppContext::new());
+    let app = Router::new()
+        .route("/", get(get_index_route))
+        .nest("/api", get_router())
+        .with_state(ctx.clone())
+        .layer(TraceLayer::new_for_http());
+    let handler = ServiceBuilder::new()
+        .map_request(process_request)
+        .map_response(process_response)
+        .layer(utils::LambdaLayer::default())
+        .service(app);
+
+    run_service(handler).await
 }
-
-pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
-    let starter = choose_starter();
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(
-            json!({
-              "message": format!("I choose you, {}!", starter),
-            })
-            .to_string()
-            .into(),
-        )?)
-}
-
-// #[tokio::main]
-// async fn main() -> Result<(), Error> {
-//     let ctx = Arc::new(AppContext::new());
-//
-//     init_tracing();
-//
-//     let app = Router::new()
-//         .nest("/api", get_router())
-//         .with_state(ctx.clone())
-//         .layer(TraceLayer::new_for_http());
-//
-//     let handler = ServiceBuilder::new()
-//         .map_request(process_request)
-//         .map_response(process_response)
-//         .layer(LambdaLayer::default())
-//         .service(app);
-//
-//     run_service(handler).await
-// }

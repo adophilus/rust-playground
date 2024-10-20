@@ -1,17 +1,20 @@
-use crate::consts::{DEFAULT_SYSTEM_MOCK, MODEL};
-use crate::Result;
-use ollama_rs::Ollama;
+use ollama_rs::{generation::completion::request::GenerationRequest, Ollama};
+use ollama_test::{
+    consts::{DEFAULT_SYSTEM_MOCK, MODEL},
+    Result,
+    gen::stream_response
+};
 
 #[tokio::main]
-fn main() -> Result<()> {
+async fn main() -> Result<()> {
     let ollama = Ollama::default();
     let model = MODEL.to_string();
-    let prompt = "What is the best programming language? (Be consise)".to_string();
+    let prompt = "What is the best programming language?".to_string();
 
-    let gen_req = GenerationRequest::new(model, prompt).system(DEFAULT_SYSTEM_MOCK.to_string());
+    let gen_req = GenerationRequest::new(model, prompt.clone()).system(DEFAULT_SYSTEM_MOCK.to_string());
 
-    let res = ollama.generate(gen_req).await?;
-    println!("->> res: {}", res.response);
+    println!("->> prompt: {}", prompt);
+    stream_response(&ollama, gen_req).await?;
 
     Ok(())
 }
