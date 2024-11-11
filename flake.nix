@@ -11,28 +11,28 @@
 
   outputs = { self, nixpkgs, rust-overlay }:
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ rust-overlay.overlays.default self.overlays.default ];
-        };
-      });
-    in
-    {
-      overlays.default = final: prev: {
-        rustToolchain =
-          let
-            rust = prev.rust-bin;
-          in
-          if builtins.pathExists ./rust-toolchain.toml then
-            rust.fromRustupToolchainFile ./rust-toolchain.toml
-          else if builtins.pathExists ./rust-toolchain then
-            rust.fromRustupToolchainFile ./rust-toolchain
-          else
-            rust.stable.latest.default.override {
-              extensions = [ "rust-src" "rustfmt" ];
+      supportedSystems =
+        [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forEachSupportedSystem = f:
+        nixpkgs.lib.genAttrs supportedSystems (system:
+          f {
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays =
+                [ rust-overlay.overlays.default self.overlays.default ];
             };
+          });
+    in {
+      overlays.default = final: prev: {
+        rustToolchain = let rust = prev.rust-bin;
+        in if builtins.pathExists ./rust-toolchain.toml then
+          rust.fromRustupToolchainFile ./rust-toolchain.toml
+        else if builtins.pathExists ./rust-toolchain then
+          rust.fromRustupToolchainFile ./rust-toolchain
+        else
+          rust.stable.latest.default.override {
+            extensions = [ "rust-src" "rustfmt" ];
+          };
       };
 
       devShells = forEachSupportedSystem ({ pkgs }: {
@@ -51,14 +51,19 @@
             trunk
             leptosfmt
 
-            pkgs.pkgsCross.avr.buildPackages.gcc
-            avrdude
-            arduino
+            # pkgs.pkgsCross.avr.buildPackages.gcc
+            # avrdude
+            # arduino
+
+            xdotool
           ];
 
           env = {
             # Required by rust-analyzer
-            RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
+            RUST_SRC_PATH =
+              "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
+            # OPENSSL_DIR = pkgs.openssl.dev;
+            # PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
           };
         };
       });
