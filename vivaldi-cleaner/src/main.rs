@@ -10,33 +10,33 @@ fn remove_all_workspaces() {
     thread::sleep(Duration::from_secs(5));
 
     for _ in 0..100 {
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.click(BTN_LEFT).unwrap();
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.click(KEY_TAB).unwrap();
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.press(KEY_LEFTSHIFT).unwrap();
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.click(KEY_F10).unwrap();
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.release(KEY_LEFTSHIFT).unwrap();
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.press(KEY_LEFTSHIFT).unwrap();
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.click(KEY_D).unwrap();
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.release(KEY_LEFTSHIFT).unwrap();
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.click(KEY_TAB).unwrap();
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
         device.click(KEY_ENTER).unwrap();
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(1000));
     }
 }
 

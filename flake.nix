@@ -51,6 +51,8 @@
             trunk
             leptosfmt
 
+            sqlx-cli
+
             # pkgs.pkgsCross.avr.buildPackages.gcc
             # avrdude
             # arduino
