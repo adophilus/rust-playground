@@ -1,17 +1,18 @@
 mod components;
+mod utils;
 
-use log::Level;
 use crate::components::section::{Section, SectionCentral};
-use leptos::{component, mount_to_body, view, IntoView, create_resource};
-use serde::Deserialize;
 use chrono::NaiveDateTime;
+use leptos::{component, create_resource, mount_to_body, view, IntoView};
+use log::Level;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
-struct ApiResponsePagination{
+struct ApiResponsePagination {
     limit: usize,
     offset: usize,
     count: usize,
-    total: usize
+    total: usize,
 }
 
 #[derive(Deserialize, Debug)]
@@ -19,7 +20,7 @@ struct ApiResponseBlogPreview {
     author: Option<String>,
     title: String,
     description: String,
-    url:String,
+    url: String,
     source: String,
     image: Option<String>,
     category: String,
@@ -31,18 +32,23 @@ struct ApiResponseBlogPreview {
 #[derive(Deserialize, Debug)]
 struct ApiResponse {
     pagination: ApiResponsePagination,
-    data: Vec<ApiResponseBlogPreview>
+    data: Vec<ApiResponseBlogPreview>,
 }
 
 #[component]
 fn BlogArticles() -> impl IntoView {
-    let blogs = create_resource(||(), |value| async move {
-            let res: ApiResponse = reqwest::get("http://api.mediastack.com/v1/news?access_key=")
-            .await.expect("Failed to get articles")
-            .json()
-            .await.expect("Failed to decode articles");
-        log::info!("{:?}",res);
-    });
+    let blogs = create_resource(
+        || (),
+        |value| async move {
+            let res: ApiResponse = reqwest::get("http://127.0.0.1:8000/api/articles")
+                .await
+                .expect("Failed to get articles")
+                .json()
+                .await
+                .expect("Failed to decode articles");
+            log::info!("{:?}", res);
+        },
+    );
 
     view! {
         <Section>
