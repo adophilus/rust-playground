@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("./blog.css");
 
 :root {
   color-scheme: light dark;
@@ -7,16 +8,29 @@
   --colors-primary: #eae0d5;
   --colors-accent: #c6ac8f;
 
-  --colors-background: light-dark(
-    var(--colors-secondary),
-    var(--colors-primary)
-  );
-  --colors-foreground: light-dark(
-    var(--colors-primary),
-    var(--colors-secondary)
-  );
+  --colors-background: light-dark(var(--colors-secondary),
+      var(--colors-primary));
+  --colors-foreground: light-dark(var(--colors-primary),
+      var(--colors-secondary));
 
   --font-NotoSans: "Noto Sans", sans-serif;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  --animation-duration: 300ms;
+  --animation-timing-function: ease-in-out;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
 }
 
 body {
@@ -32,4 +46,95 @@ body {
 
 .section__central {
   grid-column-start: 2;
+}
+
+.blog__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+
+  .tile {
+    position: relative;
+    border-radius: 1rem;
+    overflow: clip;
+    cursor: pointer;
+
+    &:hover>.cover-image {
+      transform: scale(120%);
+    }
+
+    &>.cover-image {
+      width: 100%;
+      aspect-ratio: 1/ 1;
+      object-fit: cover;
+      transition-duration: var(--animation-duration);
+      transition-timing-function: var(--animation-timing-function);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-image: linear-gradient(to bottom, color-mix(in srgb, black 20%, transparent 10%), black);
+
+      &>.category {
+        span {
+          padding-inline: 4px;
+          border-radius: 8px;
+          font-size: var(offset-size-xs);
+          font-weight: 500;
+          background-color: var(--colors-accent);
+          color: var(--colors-background);
+          box-shadow: var(--shadow-sm);
+          text-transform: uppercase;
+        }
+      }
+
+      &>.content {
+        display: flex;
+        flex-direction: column;
+        row-gap: 0.5rem;
+
+        &>.title {
+          font-size: var(--font-size-lg);
+          font-weight: 700;
+          line-clamp: 2;
+          -webkit-line-clamp: 2;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        &>.details {
+          display: flex;
+          align-items: center;
+          column-gap: 0.5rem;
+          justify-content: space-between;
+
+          &>.author {
+            display: flex;
+            align-items: center;
+            column-gap: 0.5rem;
+            font-weight: 500;
+
+            &>img {
+              width: 1.5rem;
+              aspect-ratio: 1/ 1;
+              border-radius: 100%;
+              object-fit: cover;
+            }
+          }
+
+          &>.date {
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
 }

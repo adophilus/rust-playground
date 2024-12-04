@@ -1,7 +1,7 @@
 pub mod model {
     use serde::{Deserialize, Serialize};
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Blog {
         pub id: String,
         pub title: String,
