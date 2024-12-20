@@ -8,7 +8,14 @@ declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 pub mod voting {
     use super::*;
 
-    pub fn initialize_poll(ctx:  Context<InitializePoll>, poll_id: u64) -> Result<()> {
+    pub fn initialize_poll(ctx:  Context<InitializePoll>, poll_id: u64, poll_start: u64, poll_end: u64, description: String) -> Result<()> {
+        let poll = &mut ctx.accounts.poll;
+        poll.poll_id = poll_id;
+        poll.poll_start = poll_start;
+        poll.poll_end = poll_end;
+        poll.description = description;
+        poll.candidate_amount = 0;
+
         Ok(())
     }
 }
@@ -17,9 +24,10 @@ pub mod voting {
 #[instruction(poll_id: u64)]
 pub struct InitializePoll<'info> {
     #[account(mut)]
-    pub signer: SignerInfo<'info>,
-    #[account(init, payer = payer, space = 8 + Poll::INIT_SPACE, seeds = [poll_id.to_le_bytes().as_ref()])]
+    pub signer: Signer<'info>,
+    #[account(init, payer = signer, space = 8 + Poll::INIT_SPACE, seeds = [poll_id.to_le_bytes().as_ref()], bump)]
     pub poll: Account<'info, Poll>,
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
