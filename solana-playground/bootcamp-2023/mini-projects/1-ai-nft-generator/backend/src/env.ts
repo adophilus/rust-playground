@@ -6,7 +6,7 @@ export const env = createEnv({
     PORT: z.coerce.number().min(0).max(65535),
     HYPERBOLIC_API_KEY: z.string().min(1),
     DATABASE_URL: z.string().url(),
-    DATABASE_AUTH_TOKEN: z.string().url(),
+    DATABASE_AUTH_TOKEN: z.string().optional(),
   },
   runtimeEnv: {
     PORT: process.env.PORT,

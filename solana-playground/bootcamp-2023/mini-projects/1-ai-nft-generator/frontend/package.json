@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "@nft-ai-generator/frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@nft-ai-generator/backend": "workspace:^",
     "@radix-ui/react-slot": "^1.1.1",
     "@tanstack/react-form": "^0.40.4",
     "@tanstack/react-router": "^1.92.3",
@@ -16,6 +17,7 @@
     "@tanstack/zod-form-adapter": "^0.40.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "hono": "^4.6.14",
     "lucide-react": "^0.469.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
