@@ -2,8 +2,13 @@ import { Input } from "@/components/input";
 import { Button } from "@/components/button";
 import { Section } from "@/components/section";
 import { SparklesIcon } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 
-function App() {
+export const Route = createFileRoute("/")({
+  component: IndexPage,
+});
+
+function IndexPage() {
   return (
     <div className="h-screen flex flex-col text-[#0D1B2A]">
       <div className="grow flex items-center justify-center">
@@ -24,5 +29,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
