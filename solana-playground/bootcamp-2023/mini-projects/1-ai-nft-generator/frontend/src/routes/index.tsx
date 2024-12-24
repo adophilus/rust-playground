@@ -38,9 +38,8 @@ function IndexPage() {
               form.handleSubmit();
             }}
           >
-            <form.Field
-              name="prompt"
-              children={(field) => (
+            <form.Field name="prompt">
+              {(field) => (
                 <div className="w-full">
                   <Input
                     type="text"
@@ -58,7 +57,7 @@ function IndexPage() {
                   </div>
                 </div>
               )}
-            />
+            </form.Field>
             <StatefulButton type="submit" isLoading={form.state.isSubmitting}>
               <span className="inline-flex items-center gap-1">
                 <SparklesIcon className="size-5" />
