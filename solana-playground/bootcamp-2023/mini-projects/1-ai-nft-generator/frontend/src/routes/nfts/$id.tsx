@@ -3,6 +3,7 @@ import { getNftById } from "./-components/actions";
 import type { FunctionComponent } from "react";
 import type { Nft } from "@nft-ai-generator/backend";
 import { StatefulButton } from "../../components/button";
+import { ConnectButton } from "@/lib/web3";
 
 export const Route = createFileRoute("/nfts/$id")({
   component: RouteComponent,
@@ -19,6 +20,7 @@ const NftCard: FunctionComponent<{ nft: Nft }> = ({ nft }) => {
         alt={nft.prompt}
         className="w-full h-[200px] object-cover rounded-md"
       />
+      <ConnectButton />
       <StatefulButton isLoading={isMinting}>Mint</StatefulButton>
     </div>
   );
@@ -28,7 +30,7 @@ function RouteComponent() {
   const nft = Route.useLoaderData();
 
   return (
-    <div className="h-full flex items-center justify-center">
+    <div className="h-screen flex items-center justify-center">
       <NftCard nft={nft} />
     </div>
   );
