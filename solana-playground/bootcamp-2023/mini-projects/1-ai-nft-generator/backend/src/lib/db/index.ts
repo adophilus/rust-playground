@@ -1,11 +1,14 @@
 import { env } from "@/env";
-import { drizzle } from "drizzle-orm/libsql";
+import type { DatabaseTables } from "./types";
 
-export const db = drizzle({
-  connection: {
+import { Kysely } from "kysely";
+import { LibsqlDialect } from "@libsql/kysely-libsql";
+
+export type { DatabaseTables };
+
+export const db = new Kysely<DatabaseTables>({
+  dialect: new LibsqlDialect({
     url: env.DATABASE_URL,
     authToken: env.DATABASE_AUTH_TOKEN,
-  },
+  }),
 });
-
-export * from './schema'

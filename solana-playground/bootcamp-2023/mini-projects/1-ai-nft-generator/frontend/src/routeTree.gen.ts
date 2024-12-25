@@ -12,12 +12,19 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as NftsIdImport } from './routes/nfts/$id'
 
 // Create/Update Routes
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const NftsIdRoute = NftsIdImport.update({
+  id: '/nfts/$id',
+  path: '/nfts/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -32,6 +39,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/nfts/$id': {
+      id: '/nfts/$id'
+      path: '/nfts/$id'
+      fullPath: '/nfts/$id'
+      preLoaderRoute: typeof NftsIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -39,32 +53,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/nfts/$id': typeof NftsIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/nfts/$id': typeof NftsIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/nfts/$id': typeof NftsIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/nfts/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/nfts/$id'
+  id: '__root__' | '/' | '/nfts/$id'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  NftsIdRoute: typeof NftsIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  NftsIdRoute: NftsIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +96,15 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/nfts/$id"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/nfts/$id": {
+      "filePath": "nfts/$id.tsx"
     }
   }
 }

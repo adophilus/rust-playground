@@ -1,17 +1,22 @@
 import { env } from "@/env";
 import OpenAI from "openai";
+import type { ImageGenerationService } from "./types";
 
-export namespace HyperbolicService {
-  const client = new OpenAI({
-    apiKey: env.HYPERBOLIC_API_KEY,
-    baseURL: "https://api.hyperbolic.xyz/v1/",
-  });
+class HyperbolicImageGenerationService implements ImageGenerationService {
+  private declare client: OpenAI;
 
-  type GenerateImageApiRepsonse = {
-    images: { image: string }[];
-  };
+  constructor() {
+    this.client = new OpenAI({
+      apiKey: env.HYPERBOLIC_API_KEY,
+      baseURL: "https://api.hyperbolic.xyz/v1/",
+    });
+  }
 
-  export const generateImage = async (prompt: string): Promise<File> => {
+  async generateImage(prompt: string) {
+    type GenerateImageApiRepsonse = {
+      images: { image: string }[];
+    };
+
     const res = await fetch("https://api.hyperbolic.xyz/v1/image/generation", {
       method: "POST",
       headers: {
@@ -35,5 +40,7 @@ export namespace HyperbolicService {
     );
 
     return image;
-  };
+  }
 }
+
+export { HyperbolicImageGenerationService };

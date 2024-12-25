@@ -7,6 +7,10 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [tailwindcss(), TanStackRouterVite(), react()],
+  build: {
+    outDir: "../backend/public",
+    emptyOutDir: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
