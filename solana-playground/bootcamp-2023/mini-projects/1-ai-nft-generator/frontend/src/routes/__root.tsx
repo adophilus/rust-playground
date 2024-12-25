@@ -9,12 +9,16 @@ export const Route = createRootRoute({
 
 const client = new QueryClient();
 
+const Devtools = () => {
+  return <TanStackRouterDevtools />;
+};
+
 function RootComponent() {
   return (
     <QueryClientProvider client={client}>
       <Outlet />
       <Toaster />
-      <TanStackRouterDevtools />
+      <Devtools />
     </QueryClientProvider>
   );
 }

@@ -1,16 +1,16 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { HyperbolicService } from "@/lib/hyperbolic";
+import { imageGenerator } from "@/lib/image-generator";
 import * as Schema from "./schema";
-import { UploadThingService } from "@/lib/uploadthing";
+import { storage } from "@/lib/storage";
 import { db } from "@/lib/db";
 
 const _router = new Hono()
   .post("/", zValidator("json", Schema.generateNft), async (c) => {
     const payload = c.req.valid("json");
 
-    const image = await HyperbolicService.generateImage(payload.prompt);
-    const imageUrl = await UploadThingService.uploadFile(image);
+    const image = await imageGenerator.generateImage(payload.prompt);
+    const imageUrl = await storage.uploadFile(image);
 
     const nft = await db
       .insertInto("nfts")
@@ -20,6 +20,7 @@ const _router = new Hono()
         prompt: payload.prompt,
         created_at: Date.now(),
       })
+      .returningAll()
       .executeTakeFirstOrThrow();
 
     return c.json(nft, 200);

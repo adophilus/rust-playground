@@ -7,7 +7,7 @@ export const Button = forwardRef<HTMLButtonElement, ComponentProps<"button">>(
     <button
       {...props}
       className={cn(
-        "bg-[#0D1B2A] text-white rounded-md px-2.5 py-1.5 focus:outline-2 focus:outline-offset-2 active:outline-2 active:outline-offset-2 hover:cursor-pointer disabled:bg-gray-500",
+        "bg-[#0D1B2A] text-white rounded-md px-2.5 py-1.5 focus:outline-2 focus:outline-offset-2 active:outline-2 active:outline-offset-2 hover:cursor-pointer disabled:bg-gray-500 transition-all duration-300 hover:brightness-150 hover:scale-102",
         className,
       )}
       ref={ref}

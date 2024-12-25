@@ -1,8 +1,8 @@
 import { env } from "@/env";
 import OpenAI from "openai";
-import type { ImageGenerationService } from "./types";
+import type { ImageGeneratorService } from "./types";
 
-class HyperbolicImageGenerationService implements ImageGenerationService {
+class HyperbolicImageGenerationService implements ImageGeneratorService {
   private declare client: OpenAI;
 
   constructor() {
