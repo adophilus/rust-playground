@@ -3,7 +3,7 @@ import { getNftById } from "./-components/actions";
 import type { FunctionComponent } from "react";
 import type { Nft } from "@nft-ai-generator/backend";
 import { StatefulButton } from "../../components/button";
-import { ConnectButton } from "@/lib/web3";
+import { ConnectWeb3Button } from "@/lib/web3";
 
 export const Route = createFileRoute("/nfts/$id")({
   component: RouteComponent,
@@ -15,13 +15,19 @@ const NftCard: FunctionComponent<{ nft: Nft }> = ({ nft }) => {
 
   return (
     <div className="w-[250px] border border-2 shadow-sm border-gray-300 rounded-md p-2 flex gap-2 flex-col">
-      <img
-        src={nft.image_url}
-        alt={nft.prompt}
-        className="w-full h-[200px] object-cover rounded-md"
-      />
-      <ConnectButton />
-      <StatefulButton isLoading={isMinting}>Mint</StatefulButton>
+      <div className="relative">
+        <img
+          src={nft.image_url}
+          alt={nft.prompt}
+          className="w-full h-[200px] object-cover rounded-md"
+        />
+        <div className="inset-0 absolute flex justify-end items-start p-1 bg-black/40 rounded-md">
+          <StatefulButton isLoading={isMinting} variant="secondary">
+            Mint
+          </StatefulButton>
+        </div>
+      </div>
+      <ConnectWeb3Button />
     </div>
   );
 };

@@ -2,12 +2,20 @@ import { cn } from "@/lib/utils";
 import { Loader2Icon } from "lucide-react";
 import { type ComponentProps, forwardRef, type ReactNode } from "react";
 
-export const Button = forwardRef<HTMLButtonElement, ComponentProps<"button">>(
-  ({ className, ...props }, ref) => (
+type ButtonProps = ComponentProps<"button"> & {
+  variant?: "primary" | "secondary";
+};
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = "primary", ...props }, ref) => (
     <button
       {...props}
       className={cn(
-        "bg-[#0D1B2A] text-white rounded-md px-2.5 py-1.5 focus:outline-2 focus:outline-offset-2 active:outline-2 active:outline-offset-2 hover:cursor-pointer disabled:bg-gray-500 transition-all duration-300 hover:brightness-150 hover:scale-102",
+        "rounded-md px-2.5 py-1.5 focus:outline-2 focus:outline-offset-2 active:outline-2 active:outline-offset-2 hover:cursor-pointer disabled:bg-gray-500 transition-all duration-300 hover:scale-102",
+        variant === "primary" &&
+          "bg-[#0D1B2A] text-white hover:bg-[color-mix(in_srgb,#0D1B2A_90%,#FFFFFF_10%)]",
+        variant === "secondary" &&
+          "bg-white text-[#0D1B2A] hover:bg-[color-mix(in_srgb,#FFFFFF_90%,#0D1B2A_10%)]",
         className,
       )}
       ref={ref}
@@ -15,7 +23,7 @@ export const Button = forwardRef<HTMLButtonElement, ComponentProps<"button">>(
   ),
 );
 
-export type StatefulButtonProps = ComponentProps<typeof Button> & {
+export type StatefulButtonProps = ButtonProps & {
   isLoading?: boolean;
   loader?: ReactNode;
 };

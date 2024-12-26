@@ -1,22 +1,56 @@
-import type { FunctionComponent, ReactNode } from "react";
-import { http, createConfig, WagmiProvider } from "wagmi";
-import { sepolia, baseSepolia } from "wagmi/chains";
-import "@rainbow-me/rainbowkit/styles.css";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { createAppKit } from "@reown/appkit/react";
 
-export const config = createConfig({
-  chains: [sepolia, baseSepolia],
-  connectors: [],
-  transports: {
-    [sepolia.id]: http(),
-    [baseSepolia.id]: http(),
+import { WagmiProvider } from "wagmi";
+import { baseSepolia, sepolia, solanaDevnet } from "@reown/appkit/networks";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { env } from "@/env";
+import type { FunctionComponent, ReactNode } from "react";
+import { SolanaAdapter } from "@reown/appkit-adapter-solana/react";
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
+
+const solanaWeb3JsAdapter = new SolanaAdapter({
+  wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+});
+
+const queryClient = new QueryClient();
+
+const projectId = env.REOWN_PROJECT_ID;
+
+const metadata = {
+  name: "AI NFT Generator",
+  description: "AI NFT Generator",
+  url: "https://example.com", // origin must match your domain & subdomain
+  icons: ["https://avatars.githubusercontent.com/u/179229932"],
+};
+
+const networks = [sepolia, baseSepolia, solanaDevnet];
+
+const wagmiAdapter = new WagmiAdapter({
+  networks,
+  projectId,
+  ssr: true,
+});
+
+createAppKit({
+  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
+  networks,
+  projectId,
+  metadata,
+  features: {
+    analytics: true,
   },
 });
 
 export const Provider: FunctionComponent<{ children: ReactNode }> = ({
   children,
-}) => (
-  <WagmiProvider config={config}>
-    <RainbowKitProvider>{children}</RainbowKitProvider>
-  </WagmiProvider>
-);
+}) => {
+  return (
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiProvider>
+  );
+};

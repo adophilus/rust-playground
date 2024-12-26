@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch ./scripts/server.ts",
-    "dev:db": "turso dev",
+    "dev:db": "turso dev --db-file sqlite.db",
     "migrate": "pnpm tsx ./scripts/migrate.ts"
   },
   "exports": {
