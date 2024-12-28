@@ -15,6 +15,7 @@
         devShell = pkgs.mkShell {
           buildInputs = [
             pkgs.solana-cli
+            pkgs.anchor
           ];
         };
       }
