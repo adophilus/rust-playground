@@ -40,9 +40,6 @@ createAppKit({
   networks,
   projectId,
   metadata,
-  features: {
-    analytics: true,
-  },
 });
 
 export const Provider: FunctionComponent<{ children: ReactNode }> = ({

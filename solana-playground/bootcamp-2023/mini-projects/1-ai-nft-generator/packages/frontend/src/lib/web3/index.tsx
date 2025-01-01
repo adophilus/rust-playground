@@ -1,5 +1,5 @@
 import type { FunctionComponent, ReactNode } from "react";
-import { Provider as EvmProvider } from "./lib";
+import { Provider as Web3Provider } from "./provider";
 import "@reown/appkit-wallet-button/react";
 import { Button } from "@/components/button";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
@@ -8,7 +8,7 @@ import { Loader2Icon } from "lucide-react";
 
 export const Provider: FunctionComponent<{ children: ReactNode }> = ({
   children,
-}) => <EvmProvider>{children}</EvmProvider>;
+}) => <Web3Provider>{children}</Web3Provider>;
 
 export const ConnectButton = () => {
   const { open } = useAppKit();

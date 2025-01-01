@@ -15,11 +15,10 @@ export const Route = createFileRoute("/nfts/$id")({
 });
 
 const MintButton: FunctionComponent<{ nft: Nft }> = ({ nft }) => {
-  const { status } = useAppKitAccount();
+  const { status: connectionStatus } = useAppKitAccount();
   const toastId = useRef<string | number>();
-  const isMinting = false;
 
-  const { mint } = useMint(nft, {
+  const { mint, status: mintingStatus } = useMint(nft, {
     onSuccess: (tx) => {
       console.log(tx);
       toast.dismiss(toastId.current);
@@ -32,7 +31,9 @@ const MintButton: FunctionComponent<{ nft: Nft }> = ({ nft }) => {
     },
   });
 
-  const isDisabled = status !== "connected";
+  const isMinting = mintingStatus === "pending";
+
+  const isDisabled = connectionStatus !== "connected" || isMinting;
 
   const onClick = async () => {
     toastId.current = toast.loading("Minting...");

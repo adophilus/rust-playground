@@ -4,18 +4,19 @@ import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
+import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import nodePolyfills from "rollup-plugin-polyfill-node";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    NodeGlobalsPolyfillPlugin({
-      buffer: true,
-      process: true,
-    }),
-    nodePolyfills({
-      include: ["stream"],
-    }),
+    // NodeGlobalsPolyfillPlugin({
+    //   buffer: true,
+    //   process: true,
+    // }),
+    // nodePolyfills({
+    //   include: ["stream"],
+    // }),
+    // NodeModulesPolyfillPlugin(),
     tailwindcss(),
     TanStackRouterVite(),
     react(),
@@ -29,10 +30,6 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       stream: "stream-browserify",
     },
-  },
-  define: {
-    process: {},
-    global: {},
   },
   server: {
     proxy: {
