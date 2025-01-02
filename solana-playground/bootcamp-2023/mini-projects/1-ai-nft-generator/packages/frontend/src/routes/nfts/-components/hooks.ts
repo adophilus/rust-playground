@@ -33,6 +33,7 @@ import { assert } from "assertate";
 import { createDefaultProgramRepository } from "@metaplex-foundation/umi-program-repository";
 import { createUmi } from "@metaplex-foundation/umi";
 import { createWeb3JsEddsa } from "@metaplex-foundation/umi-eddsa-web3js";
+import { backendClient } from "@/lib/http";
 
 export const useMint = (nft: Nft, payload: UseMutationOptions) => {
   const { connection } = useAppKitConnection();
@@ -73,6 +74,8 @@ export const useMint = (nft: Nft, payload: UseMutationOptions) => {
           category: "image",
         },
       };
+
+      console.log(metadata.image);
 
       const mintKeypair = Keypair.generate();
 
@@ -149,43 +152,44 @@ export const useMint = (nft: Nft, payload: UseMutationOptions) => {
 
       const umi = createUmi();
 
-      const myPublicKey = new PublicKey(
-        walletProvider.publicKey.toString(),
-      ).toBase58();
-
       console.log("Creating create metadata account instruction...");
       // 5) Instruction invoke Metaplex Token Metadata Program to create the Metadata account
       const mplCreateMetadataAccountInstruction = createMetadataAccountV3(
         {
-          // metadata: metadataAccountAddress, // metadata account address
-          // mint: mintKeypair.publicKey, // mint address
-          // mintAuthority: walletProvider.publicKey, // authority to mint tokens
-          // payer: walletProvider, // payer
-          // updateAuthority: walletProvider.publicKey, // authority to update metadata account
-
           eddsa: createWeb3JsEddsa(),
-          identity: walletProvider.publicKey,
-          // identity: {
-          //   ...walletProvider,
-          //   publicKey: myPublicKey,
-          // },
-          // payer: {
-          //   ...walletProvider,
-          //   publicKey: myPublicKey,
-          // },
-          payer: walletProvider.publicKey,
+          identity: {
+            signMessage: walletProvider.signMessage,
+            signTransaction: walletProvider.signTransaction as any,
+            signAllTransactions: walletProvider.signAllTransactions as any,
+            publicKey: walletProvider.publicKey.toBase58() as any,
+          },
+          payer: {
+            signMessage: walletProvider.signMessage,
+            signTransaction: walletProvider.signTransaction as any,
+            signAllTransactions: walletProvider.signAllTransactions as any,
+            publicKey: walletProvider.publicKey.toBase58() as any,
+          }, //walletProvider.publicKey,
           programs: createDefaultProgramRepository({
             rpc: umi.rpc,
           }),
         },
         {
-          metadata: metadataAccountAddress,
-          mint: mintKeypair.publicKey,
-          mintAuthority: myPublicKey,
+          metadata: metadataAccountAddress.toBase58() as any,
+          mint: mintKeypair.publicKey.toBase58() as any,
+          mintAuthority: {
+            signMessage: walletProvider.signMessage,
+            signTransaction: walletProvider.signTransaction as any,
+            signAllTransactions: walletProvider.signAllTransactions as any,
+            publicKey: walletProvider.publicKey.toBase58() as any,
+          }, // myPublicKey,
           data: {
             name: metadata.name,
             symbol: metadata.symbol,
-            uri: "https://google.com",
+            uri: backendClient.api.nfts[":id"].metadata
+              .$url({
+                param: { id: nft.id },
+              })
+              .toString(),
             sellerFeeBasisPoints: 500,
             creators: null,
             collection: null,
@@ -193,23 +197,9 @@ export const useMint = (nft: Nft, payload: UseMutationOptions) => {
           },
           isMutable: true,
           collectionDetails: null,
-
-          // createMetadataAccountArgsV3: {
-          //   data: {
-          //     creators: null, // creators of the NFT (optional)
-          //     name: metadata.name, // on-chain name
-          //     symbol: metadata.symbol, // on-chain symbol
-          //     uri: nft.metadata_uri ?? "https://google.com", // off-chain metadata
-          //     sellerFeeBasisPoints: 0, // royalty fee
-          //     collection: null, // collection the NFT belongs to (optional)
-          //     uses: null, // uses (optional)
-          //   },
-          //   collectionDetails: null, // collection details (optional)
-          //   isMutable: false, // whether the metadata can be changed
-          // },
         },
       )
-        // .useV0()
+        .useV0()
         .getInstructions()[0];
       console.log(mplCreateMetadataAccountInstruction);
 
@@ -254,11 +244,11 @@ export const useMint = (nft: Nft, payload: UseMutationOptions) => {
             programId: new PublicKey(
               mplCreateMetadataAccountInstruction.programId,
             ),
-            data: mplCreateMetadataAccountInstruction.data,
+            data: Buffer.from(mplCreateMetadataAccountInstruction.data),
           }),
 
           // 6) Set mint authority to null
-          // setAuthorityInstruction,
+          setAuthorityInstruction,
         ],
       }).compileToV0Message();
 
