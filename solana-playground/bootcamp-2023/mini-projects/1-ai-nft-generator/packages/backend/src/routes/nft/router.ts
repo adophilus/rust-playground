@@ -18,7 +18,6 @@ const _router = new Hono()
         id: crypto.randomUUID(),
         image_url: imageUrl,
         prompt: payload.prompt,
-        created_at: Date.now(),
       })
       .returningAll()
       .executeTakeFirstOrThrow();

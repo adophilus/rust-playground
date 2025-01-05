@@ -54,8 +54,7 @@ const build = async () => {
   }
 
   await $`mv ${BUILD_DIRECTORY}/server.js ${BUILD_DIRECTORY}/index.mjs`;
-  await $`mkdir ${BUILD_DIRECTORY}/public`;
-  await $`cp -r ${PUBLIC_DIRECTORY} ${BUILD_DIRECTORY}/public`;
+  await $`cp -r ${PUBLIC_DIRECTORY} ${BUILD_DIRECTORY}`;
 };
 
 const moveBuiltArtifacts = async () => {
