@@ -1,9 +1,12 @@
 {
-	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"rewrites": [
-		{
-			"source": "/api/:path*",
-			"destination": "/api*"
-		}
-	]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
+  "framework": "vite",
+  "buildCommand": "pnpm --filter @nft-ai-generator/frontend build",
+  "outputDirectory": "./packages/frontend/dist"
 }
