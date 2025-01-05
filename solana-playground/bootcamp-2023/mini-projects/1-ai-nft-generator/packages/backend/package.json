@@ -13,8 +13,6 @@
   "dependencies": {
     "@hono/node-server": "^1.13.7",
     "@hono/zod-validator": "^0.4.2",
-    "@libsql/client": "^0.14.0",
-    "@libsql/kysely-libsql": "^0.4.1",
     "@t3-oss/env-core": "^0.11.1",
     "hono": "^4.6.14",
     "kysely": "^0.24.2",

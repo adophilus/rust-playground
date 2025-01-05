@@ -16,6 +16,8 @@
           buildInputs = [
             pkgs.clang
             pkgs.libudev-zero
+            pkgs.pnpm
+            pkgs.nodejs_20
           ];
         };
       }

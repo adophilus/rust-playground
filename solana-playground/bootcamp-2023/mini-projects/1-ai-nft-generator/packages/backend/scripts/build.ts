@@ -1,6 +1,5 @@
 import { $ } from "bun";
 import { exists } from "node:fs/promises";
-import * as esbuild from "esbuild";
 
 const BUILD_CONFIG = {
   version: 3,
@@ -43,18 +42,18 @@ const build = async () => {
     await $`mkdir -p ${BUILD_DIRECTORY}`;
   }
 
-  const buildResult = await esbuild.build({
-    entryPoints: ["./scripts/server.ts"],
-    outfile: `${BUILD_DIRECTORY}/index.mjs`,
-    platform: "node",
-    bundle: true,
+  const buildOutput = await Bun.build({
+    entrypoints: ["./scripts/server.ts"],
+    outdir: BUILD_DIRECTORY,
+    target: "node",
   });
 
-  if (buildResult.errors.length !== 0) {
-    console.error(buildResult);
+  if (buildOutput.success === false) {
+    console.error(buildOutput);
     throw new Error("❌ Build failed");
   }
 
+  await $`mv ${BUILD_DIRECTORY}/server.js ${BUILD_DIRECTORY}/index.mjs`;
   await $`mkdir ${BUILD_DIRECTORY}/public`;
   await $`cp -r ${PUBLIC_DIRECTORY} ${BUILD_DIRECTORY}/public`;
 };
