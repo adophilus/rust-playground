@@ -5,8 +5,7 @@
     "dev": "tsx watch ./scripts/server.ts",
     "dev:db": "turso dev --db-file sqlite.db",
     "migrate": "tsx ./scripts/migrate.ts",
-    "build": "bun ./scripts/build.ts",
-    "deploy": "vercel deploy --prebuilt"
+    "build": "bun ./scripts/build.ts"
   },
   "exports": {
     ".": "./src/index.ts"
@@ -27,6 +26,7 @@
   "devDependencies": {
     "@types/bun": "^1.1.14",
     "@types/node": "^20.11.17",
+    "bun": "^1.1.42",
     "kysely-migration-cli": "^0.4.2",
     "tsx": "^4.19.2"
   }

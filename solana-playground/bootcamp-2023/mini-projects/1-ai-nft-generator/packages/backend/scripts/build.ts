@@ -65,7 +65,7 @@ const main = async () => {
   console.log("🚀 Building...");
 
   if (!(await exists(VERCEL_OUTPUT_DIRECTORY))) {
-    await $`mkdir ${VERCEL_OUTPUT_DIRECTORY}`;
+    await $`mkdir -p ${VERCEL_OUTPUT_DIRECTORY}`;
   } else {
     await $`rm -rf ${VERCEL_OUTPUT_DIRECTORY}`;
     await $`mkdir -p ${VERCEL_OUTPUT_DIRECTORY}`;
