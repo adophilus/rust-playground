@@ -1,8 +1,9 @@
 import type { ImageGeneratorService } from "./types";
+import { ok } from "true-myth/result";
 
 class LocalhostImageGenerationService implements ImageGeneratorService {
   async generateImage(prompt: string) {
-    return new File([prompt], "image.png");
+    return ok(new File([prompt], "image.png"));
   }
 }
 

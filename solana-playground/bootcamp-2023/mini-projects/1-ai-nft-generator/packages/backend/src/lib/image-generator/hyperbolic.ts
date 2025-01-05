@@ -1,8 +1,12 @@
 import { env } from "@/env";
 import OpenAI from "openai";
-import type { ImageGeneratorService } from "./types";
+import {
+  ImageGeneratorServiceError,
+  type ImageGeneratorService,
+} from "./types";
+import { ok, err } from "true-myth/result";
 
-class HyperbolicImageGenerationService implements ImageGeneratorService {
+class HyperbolicImageGeneratorService implements ImageGeneratorService {
   private declare client: OpenAI;
 
   constructor() {
@@ -17,20 +21,26 @@ class HyperbolicImageGenerationService implements ImageGeneratorService {
       images: { image: string }[];
     };
 
-    const res = await fetch("https://api.hyperbolic.xyz/v1/image/generation", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.HYPERBOLIC_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model_name: "SDXL1.0-base",
-        prompt,
-        height: 1024,
-        width: 1024,
-        backend: "auto",
-      }),
-    });
+    let res: Response;
+    try {
+      res = await fetch("https://api.hyperbolic.xyz/v1/image/generation", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.HYPERBOLIC_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model_name: "SDXL1.0-base",
+          prompt,
+          height: 1024,
+          width: 1024,
+          backend: "auto",
+        }),
+      });
+    } catch (error) {
+      console.warn(error);
+      return err(ImageGeneratorServiceError.UploadFailed);
+    }
 
     const json: GenerateImageApiRepsonse = await res.json();
 
@@ -39,8 +49,8 @@ class HyperbolicImageGenerationService implements ImageGeneratorService {
       "image.png",
     );
 
-    return image;
+    return ok(image);
   }
 }
 
-export { HyperbolicImageGenerationService };
+export { HyperbolicImageGeneratorService as HyperbolicImageGenerationService };

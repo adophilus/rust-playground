@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "pnpm run -r --parallel --aggregate-output dev",
     "dev:db": "pnpm run --filter @nft-ai-generator/backend dev:db",
-    "build": "pnpm run --filter @nft-ai-generator/frontend build && pnpm run --filter @nft-ai-generator/backend build",
+    "build": "./scripts/build.sh",
     "deploy": "vercel deploy"
   },
   "devDependencies": {

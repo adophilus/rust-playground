@@ -8,6 +8,9 @@
   },
   "linter": {
     "rules": {
+      "style": {
+        "useImportType": "off"
+      },
       "suspicious": {
         "noExplicitAny": {
           "level": "off"
