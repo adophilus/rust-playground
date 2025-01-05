@@ -16,7 +16,7 @@ const FUNCTION_CONFIG = {
   handler: "index.mjs",
 };
 
-const VERCEL_OUTPUT_DIRECTORY = "./.vercel/output";
+const VERCEL_OUTPUT_DIRECTORY = "../../.vercel/output";
 const VERCEL_FUNCTION_DIRECTORY = `${VERCEL_OUTPUT_DIRECTORY}/functions/index.func`;
 const BUILD_DIRECTORY = "./build";
 const PUBLIC_DIRECTORY = "./public";
@@ -55,6 +55,8 @@ const build = async () => {
   await $`mv ${BUILD_DIRECTORY}/server.js ${BUILD_DIRECTORY}/index.mjs`;
   await $`mkdir ${BUILD_DIRECTORY}/public`;
   await $`cp -r ${PUBLIC_DIRECTORY} ${BUILD_DIRECTORY}/public`;
+  await $`mkdir ${BUILD_DIRECTORY}/node_modules`;
+  await $`cp -r node_modules ${BUILD_DIRECTORY}/node_modules`;
 };
 
 const moveBuiltArtifacts = async () => {
