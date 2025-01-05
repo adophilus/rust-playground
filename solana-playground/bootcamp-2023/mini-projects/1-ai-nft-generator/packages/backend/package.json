@@ -27,7 +27,6 @@
     "@types/bun": "^1.1.14",
     "@types/node": "^20.11.17",
     "@types/pg": "^8.11.10",
-    "bun": "^1.1.42",
     "esbuild": "^0.24.2",
     "kysely-migration-cli": "^0.4.2",
     "tsx": "^4.19.2"
