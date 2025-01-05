@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
@@ -9,6 +10,7 @@
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "Bundler",
+    "esModuleInterop": true,
     "strict": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,

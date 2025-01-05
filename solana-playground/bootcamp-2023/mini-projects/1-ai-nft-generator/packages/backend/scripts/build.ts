@@ -1,5 +1,6 @@
 import { $ } from "bun";
 import { exists } from "node:fs/promises";
+import * as esbuild from "esbuild";
 
 const BUILD_CONFIG = {
   version: 3,
@@ -14,6 +15,7 @@ const BUILD_CONFIG = {
 const FUNCTION_CONFIG = {
   runtime: "nodejs20.x",
   handler: "index.mjs",
+  launcherType: "Nodejs",
 };
 
 const VERCEL_OUTPUT_DIRECTORY = "../../.vercel/output";
@@ -41,22 +43,20 @@ const build = async () => {
     await $`mkdir -p ${BUILD_DIRECTORY}`;
   }
 
-  const buildOutput = await Bun.build({
-    entrypoints: ["./scripts/server.ts"],
-    outdir: BUILD_DIRECTORY,
-    target: "node",
+  const buildResult = await esbuild.build({
+    entryPoints: ["./scripts/server.ts"],
+    outfile: `${BUILD_DIRECTORY}/index.mjs`,
+    platform: "node",
+    bundle: true,
   });
 
-  if (buildOutput.success === false) {
-    console.error(buildOutput);
+  if (buildResult.errors.length !== 0) {
+    console.error(buildResult);
     throw new Error("❌ Build failed");
   }
 
-  await $`mv ${BUILD_DIRECTORY}/server.js ${BUILD_DIRECTORY}/index.mjs`;
   await $`mkdir ${BUILD_DIRECTORY}/public`;
   await $`cp -r ${PUBLIC_DIRECTORY} ${BUILD_DIRECTORY}/public`;
-  await $`mkdir ${BUILD_DIRECTORY}/node_modules`;
-  await $`cp -r node_modules ${BUILD_DIRECTORY}/node_modules`;
 };
 
 const moveBuiltArtifacts = async () => {
