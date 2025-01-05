@@ -28,7 +28,6 @@
     "@types/bun": "^1.1.14",
     "@types/node": "^20.11.17",
     "kysely-migration-cli": "^0.4.2",
-    "tsx": "^4.19.2",
-    "vercel": "^39.2.5"
+    "tsx": "^4.19.2"
   }
 }
