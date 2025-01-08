@@ -2,6 +2,7 @@
   "name": "@nft-ai-generator/backend",
   "type": "module",
   "scripts": {
+    "start": "tsx ./scripts/server.ts",
     "dev": "tsx watch ./scripts/server.ts",
     "dev:db": "turso dev --db-file sqlite.db",
     "migrate": "tsx ./scripts/migrate.ts",

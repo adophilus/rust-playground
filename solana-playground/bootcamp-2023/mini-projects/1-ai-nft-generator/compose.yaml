@@ -1,0 +1,7 @@
+services:
+  reverse-proxy:
+    build: ./packages/reverse-proxy
+    ports:
+      - 8080:80
+  backend:
+    build: ./packages/backend
