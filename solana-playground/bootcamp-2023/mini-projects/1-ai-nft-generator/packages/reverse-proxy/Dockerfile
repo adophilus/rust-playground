@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine-slim
+FROM nginx:1.27.3-alpine3.20-perl
 
 WORKDIR /usr/src/app
 COPY . .

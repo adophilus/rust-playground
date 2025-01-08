@@ -2,7 +2,10 @@ services:
   reverse-proxy:
     build: ./packages/reverse-proxy
     ports:
-      - 8080:80
+      - 80:80
+      - 443:443
+    environment:
+      - PORT=$PORT
   backend:
     build: ./packages/backend
     environment:
