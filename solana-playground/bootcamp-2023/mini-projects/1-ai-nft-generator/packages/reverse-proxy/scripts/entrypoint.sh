@@ -1,5 +1,17 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-./substitute-environment-variables.sh
+ROOT_DIR="/usr/src/app"
+SCRIPTS_DIR="$ROOT_DIR/scripts"
+DATA_DIR="$ROOT_DIR/data"
 
-while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -c /usr/src/app/data/nginx/nginx.conf
+# Substitute environment variables in configuration
+$SCRIPTS_DIR/substitute-environment-variables.sh
+
+# Periodically reload Nginx configuration in the background
+while :; do
+  sleep 6h
+  nginx -s reload
+done &
+
+# Start Nginx with the specified configuration
+nginx -c "$DATA_DIR/nginx/nginx.conf"
