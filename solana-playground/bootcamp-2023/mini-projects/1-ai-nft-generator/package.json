@@ -9,5 +9,6 @@
   },
   "devDependencies": {
     "vercel": "^39.2.5"
-  }
+  },
+  "packageManager": "pnpm@9.15.2"
 }
