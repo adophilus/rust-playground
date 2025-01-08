@@ -1,9 +1,9 @@
 FROM nginx:1.27.3-alpine3.20-perl
 
-RUN apk add --no-cache gettext certbot python3-certbot-nginx
+RUN apk add --no-cache gettext certbot certbot-nginx
 
-RUN certbot --nginx -d nft-ai-generator.undo.it
-RUN certbot renew --dry-run
+# RUN certbot --nginx -d nft-ai-generator.undo.it
+# RUN certbot renew --dry-run
 
 WORKDIR /usr/src/app
 COPY . .
