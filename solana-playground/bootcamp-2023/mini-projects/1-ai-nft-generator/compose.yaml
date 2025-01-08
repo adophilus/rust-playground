@@ -5,3 +5,9 @@ services:
       - 8080:80
   backend:
     build: ./packages/backend
+    environment:
+      - PORT=$PORT
+      - NODE_ENV=$NODE_ENV
+      - HYPERBOLIC_API_KEY=$HYPERBOLIC_API_KEY
+      - DATABASE_URL=$DATABASE_URL
+      - UPLOADTHING_TOKEN=$UPLOADTHING_TOKEN

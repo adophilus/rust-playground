@@ -6,6 +6,7 @@ RUN corepack enable
 FROM base AS app
 COPY . /usr/src/app
 WORKDIR /usr/src/app
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-EXPOSE 8000
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+EXPOSE 5000
+
 CMD [ "pnpm", "start" ]
