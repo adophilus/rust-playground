@@ -36,7 +36,8 @@ echo
 
 
 echo "### Starting nginx ..."
-docker compose up --force-recreate -d reverse-proxy
+# docker compose up --force-recreate -d reverse-proxy
+docker compose up -d
 echo
 
 echo "### Deleting dummy certificate for $domains ..."
@@ -64,7 +65,7 @@ esac
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
 docker compose run --rm --entrypoint "\
-  certbot certonly --webroot -w /var/www/certbot \
+  certbot certonly --webroot-path /var/www/certbot \
     $staging_arg \
     $email_arg \
     $domain_args \
@@ -73,5 +74,8 @@ docker compose run --rm --entrypoint "\
     --force-renewal" certbot
 echo
 
-echo "### Reloading nginx ..."
-docker compose exec reverse-proxy nginx -s reload
+# echo "### Reloading nginx ..."
+# docker compose exec reverse-proxy nginx -s reload
+
+echo "### Stopping nginx..."
+docker compose down
