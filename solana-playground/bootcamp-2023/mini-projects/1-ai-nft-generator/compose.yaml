@@ -2,10 +2,12 @@ services:
   reverse-proxy:
     build: ./packages/reverse-proxy
     ports:
-      - 8080:80
-      - 8443:443
+      - 80:80
+      - 443:443
     environment:
-      - PORT=$PORT
+      - BACKEND_PORT=$PORT
+    networks:
+      - app
   backend:
     build: ./packages/backend
     environment:
@@ -14,3 +16,8 @@ services:
       - HYPERBOLIC_API_KEY=$HYPERBOLIC_API_KEY
       - DATABASE_URL=$DATABASE_URL
       - UPLOADTHING_TOKEN=$UPLOADTHING_TOKEN
+    networks:
+      - app
+networks:
+  app:
+    driver: bridge
