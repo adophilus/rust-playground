@@ -1,12 +1,13 @@
 #! /usr/bin/env bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="/usr/src/app"
+SCRIPT_DIR="$ROOT_DIR/scripts"
+
 domains=("nft-ai-generator.undo.it")
 rsa_key_size=4096
 data_path="$ROOT_DIR/data/certbot"
 email="" # Adding a valid address is strongly recommended
-staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
+staging=1 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
