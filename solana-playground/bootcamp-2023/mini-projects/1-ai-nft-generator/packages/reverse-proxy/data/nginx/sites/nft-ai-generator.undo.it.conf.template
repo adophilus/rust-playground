@@ -1,12 +1,13 @@
 server {
   listen 80;
   server_name nft-ai-generator.undo.it;
-  location / {
-    return 301 https://$host$request_uri;
-  }
 
   location /.well-known/acme-challenge/ {
     root /var/www/certbot;
+  }
+
+  location / {
+    return 301 https://$host$request_uri;
   }
 }
 
