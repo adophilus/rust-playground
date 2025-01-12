@@ -35,7 +35,10 @@ function IndexPage() {
         json: payload,
       });
 
-      return res.json();
+      if (res.status === 200) return res.json();
+
+      const json = await res.json();
+      throw new Error(json.error);
     },
     onSuccess: (data) => {
       toast.dismiss(toastId.current);

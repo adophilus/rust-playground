@@ -22,30 +22,38 @@ class ArweaveStorageService implements StorageService {
   }
 
   async uploadFile(file: File): Promise<Result<string, StorageServiceError>> {
-    const tx = await this.arweave.createTransaction({
-      data: await file.arrayBuffer(),
-    });
-    tx.addTag("Content-Type", file.type);
+    try {
+      const tx = await this.arweave.createTransaction(
+        {
+          data: await file.arrayBuffer(),
+        },
+        this.wallet,
+      );
+      tx.addTag("Content-Type", file.type);
 
-    await this.arweave.transactions.sign(tx);
+      await this.arweave.transactions.sign(tx, this.wallet);
 
-    const uploader = await this.arweave.transactions.getUploader(tx);
+      const uploader = await this.arweave.transactions.getUploader(tx);
 
-    while (!uploader.isComplete) {
-      await uploader.uploadChunk();
+      while (!uploader.isComplete) {
+        await uploader.uploadChunk();
+      }
+
+      const { status, confirmed } = await this.arweave.transactions.getStatus(
+        tx.id,
+      );
+
+      if (status !== 200) return err("UPLOAD_FAILED");
+      assert(confirmed !== null, "Invariant reached");
+
+      if (confirmed.number_of_confirmations)
+        return ok(`https://arweave.net/${tx.id}`);
+
+      return err("UPLOAD_FAILED");
+    } catch (error) {
+      console.warn("Failed to upload image:", error);
+      return err("UPLOAD_FAILED");
     }
-
-    const { status, confirmed } = await this.arweave.transactions.getStatus(
-      tx.id,
-    );
-
-    if (status !== 200) return err("UPLOAD_FAILED");
-    assert(confirmed !== null, "Invariant reached");
-
-    if (confirmed.number_of_confirmations)
-      return ok(`https://arweave.net/${tx.id}`);
-
-    return err("UPLOAD_FAILED");
   }
 }
 

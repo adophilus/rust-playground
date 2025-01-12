@@ -40,7 +40,7 @@ class HyperbolicImageGeneratorService implements ImageGeneratorService {
         }),
       });
     } catch (error) {
-      console.warn(error);
+      console.warn("Image generation failed:", error);
       return err("GENERATION_FAILED");
     }
 

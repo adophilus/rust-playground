@@ -13,12 +13,12 @@ const _router = new Hono()
       payload.prompt,
     );
     if (imageGenerationResult.isErr)
-      return c.json({ error: "Image generation failed" }, 500);
+      return c.json({ error: "NFT generation failed" }, 500);
     const image = imageGenerationResult.value;
 
     const storageUploadResult = await storage.uploadFile(image);
     if (storageUploadResult.isErr)
-      return c.json({ error: "Image upload failed" }, 500);
+      return c.json({ error: "NFT generation failed" }, 500);
     const imageUrl = storageUploadResult.value;
 
     const nft = await db
