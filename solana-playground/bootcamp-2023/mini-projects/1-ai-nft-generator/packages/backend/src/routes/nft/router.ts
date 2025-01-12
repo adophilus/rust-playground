@@ -9,8 +9,17 @@ const _router = new Hono()
   .post("/", zValidator("json", Schema.generateNft), async (c) => {
     const payload = c.req.valid("json");
 
-    const image = await imageGenerator.generateImage(payload.prompt);
-    const imageUrl = await storage.uploadFile(image);
+    const imageGenerationResult = await imageGenerator.generateImage(
+      payload.prompt,
+    );
+    if (imageGenerationResult.isErr)
+      return c.json({ error: "Image generation failed" }, 500);
+    const image = imageGenerationResult.value;
+
+    const storageUploadResult = await storage.uploadFile(image);
+    if (storageUploadResult.isErr)
+      return c.json({ error: "Image upload failed" }, 500);
+    const imageUrl = storageUploadResult.value;
 
     const nft = await db
       .insertInto("nfts")

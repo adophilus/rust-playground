@@ -1,6 +1,6 @@
 import { Result } from "true-myth";
 
-export type ImageGeneratorServiceError = "UPLOAD_FAILED";
+export type ImageGeneratorServiceError = "GENERATION_FAILED";
 
 export type ImageGeneratorService = {
   generateImage: (

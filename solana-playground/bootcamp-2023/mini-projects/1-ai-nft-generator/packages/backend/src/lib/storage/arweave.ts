@@ -23,7 +23,7 @@ class ArweaveStorageService implements StorageService {
 
   async uploadFile(file: File): Promise<Result<string, StorageServiceError>> {
     const tx = await this.arweave.createTransaction({
-      data: await file.bytes(),
+      data: await file.arrayBuffer(),
     });
     tx.addTag("Content-Type", file.type);
 

@@ -1,10 +1,10 @@
 import { env } from "@/env";
 import OpenAI from "openai";
 import {
-  ImageGeneratorServiceError,
+  type ImageGeneratorServiceError,
   type ImageGeneratorService,
 } from "./types";
-import { ok, err } from "true-myth/result";
+import Result, { ok, err } from "true-myth/result";
 
 class HyperbolicImageGeneratorService implements ImageGeneratorService {
   private declare client: OpenAI;
@@ -16,7 +16,9 @@ class HyperbolicImageGeneratorService implements ImageGeneratorService {
     });
   }
 
-  async generateImage(prompt: string) {
+  async generateImage(
+    prompt: string,
+  ): Promise<Result<File, ImageGeneratorServiceError>> {
     type GenerateImageApiRepsonse = {
       images: { image: string }[];
     };
@@ -39,7 +41,7 @@ class HyperbolicImageGeneratorService implements ImageGeneratorService {
       });
     } catch (error) {
       console.warn(error);
-      return err(ImageGeneratorServiceError.UploadFailed);
+      return err("GENERATION_FAILED");
     }
 
     const json: GenerateImageApiRepsonse = await res.json();
