@@ -23,6 +23,9 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.11.1
         version: 0.11.1(typescript@5.6.3)(zod@3.24.1)
+      arweave:
+        specifier: ^1.15.5
+        version: 1.15.5
       hono:
         specifier: ^4.6.14
         version: 4.6.14
@@ -14881,7 +14884,6 @@ snapshots:
   arconnect@0.4.2:
     dependencies:
       arweave: 1.15.5
-    optional: true
 
   arg@4.1.0: {}
 
@@ -14906,7 +14908,6 @@ snapshots:
       asn1.js: 5.4.1
       base64-js: 1.5.1
       bignumber.js: 9.1.2
-    optional: true
 
   asap@2.0.6: {}
 

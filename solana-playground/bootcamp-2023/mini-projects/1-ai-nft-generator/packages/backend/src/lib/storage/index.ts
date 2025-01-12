@@ -1,11 +1,11 @@
 import { env } from "@/env";
 import type { StorageService } from "./types";
 import { LocalhostStorageService } from "./localhost";
-import { UploadThingStorageService } from "./uploadthing";
+import { ArweaveStorageService } from "./arweave";
 
 export const storage: StorageService =
   env.NODE_ENV === "development"
     ? new LocalhostStorageService()
-    : new UploadThingStorageService();
+    : new ArweaveStorageService();
 
 export type { StorageService };

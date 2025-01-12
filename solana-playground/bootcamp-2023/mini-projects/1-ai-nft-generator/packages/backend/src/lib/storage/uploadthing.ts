@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import { UTApi } from "uploadthing/server";
 import type { StorageService } from "./types";
+import { ok } from "true-myth/result";
 
 class UploadThingStorageService implements StorageService {
   private declare utapi: UTApi;
@@ -13,7 +14,7 @@ class UploadThingStorageService implements StorageService {
   async uploadFile(file: File) {
     const res = await this.utapi.uploadFiles(file);
     if (res.error) throw new Error(res.error.message);
-    return res.data.url;
+    return ok(res.data.url);
   }
 }
 

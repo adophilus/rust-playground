@@ -1,8 +1,6 @@
 import { Result } from "true-myth";
 
-export enum ImageGeneratorServiceError {
-  UploadFailed,
-}
+export type ImageGeneratorServiceError = "UPLOAD_FAILED";
 
 export type ImageGeneratorService = {
   generateImage: (
