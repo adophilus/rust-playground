@@ -3634,6 +3634,7 @@ dependencies = [
  "serde",
  "serde_json",
  "view_transitions_core",
+ "web-sys",
 ]
 
 [[package]]

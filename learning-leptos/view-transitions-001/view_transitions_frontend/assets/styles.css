@@ -54,6 +54,7 @@ body {
   gap: 1.5rem;
 
   .tile {
+    view-transition-name: var(--view-transition-name);
     position: relative;
     border-radius: 1rem;
     overflow: clip;
