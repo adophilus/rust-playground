@@ -2,5 +2,6 @@
 resolver = "2"
 members = [
   "view_transitions_frontend",
-  "view_transitions_backend"
-, "view_transitions_core"]
+  "view_transitions_backend",
+  "view_transitions_core"
+]

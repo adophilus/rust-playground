@@ -16,11 +16,11 @@ pub fn BlogView() -> impl IntoView {
             <img src="https://via.assets.so/img.jpg?w=400&h=150&tc=#ffffff&bg=#cecece" class="__cover-image" />
             <Section>
                 <SectionCentral>
-            <div>
-                    <h1 class="__title">Blog title</h1>
-            <div class="__details">
-            </div>
-            </div>
+                    <div>
+                        <h1 class="__title">Blog title</h1>
+                        <div class="__details">
+                        </div>
+                    </div>
                 </SectionCentral>
             </Section>
         </div>

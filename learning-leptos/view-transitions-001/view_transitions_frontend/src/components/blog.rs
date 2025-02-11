@@ -9,17 +9,17 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
         <A class="tile" href=format!("/{}", blog.id)>
             <img src=blog.image_url class="cover-image" />
             <span class="overlay">
-        <span class="category"><span>{blog.topic}</span></span>
-        <span class="content">
-                <span class="title">{blog.title}</span>
-                <span class="details">
-                    <span class="author">
-                        <img src="./assets/avatar.jpg" />
-                        <span>By Jane Doe</span>
-                    </span>
-                    <span class="date">22nd Nov, 2024</span>
+                <span class="category"><span>{blog.topic}</span></span>
+                <span class="content">
+                        <span class="title">{blog.title}</span>
+                        <span class="details">
+                            <span class="author">
+                                <img src="./assets/avatar.jpg" />
+                                <span>By Jane Doe</span>
+                            </span>
+                            <span class="date">22nd Nov, 2024</span>
+                        </span>
                 </span>
-        </span>
             </span>
         </A>
     }
