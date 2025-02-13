@@ -11,13 +11,13 @@ use view_transitions_core::model::Blog;
 fn BlogContent(blog: Blog) -> impl IntoView {
     view! {
         <div class="blog-page">
-            <img src="https://via.assets.so/img.jpg?w=400&h=150&tc=#ffffff&bg=#cecece" class="cover-image" style=format!("--view-transition-name:blog-image-{}", blog.id) />
+            <img src=blog.image_url class="cover-image" style=format!("--view-transition-name:blog-image-{}", blog.id) />
             <Section>
                 <SectionCentral>
                     <div>
-                        <h1 class="title">"Blog title"</h1>
+                        <h1 class="title">{blog.title}</h1>
                         <div class="details">
-                            "Here's the details of the blog post"
+                            {blog.content}
                         </div>
                     </div>
                 </SectionCentral>
