@@ -1,34 +1,35 @@
 .blog-page {
-  .__cover-image {
+  .cover-image {
+    view-transition-name: var(--view-transition-name);
     display: block;
     width: 100%;
     height: 300px;
     /* aspect-ratio: 16 / 9; */
     object-fit: cover;
-    transition-duration: var(--animation-duration);
-    transition-timing-function: var(--animation-timing-function);
+    /*transition-duration: var(--animation-duration);*/
+    /*transition-timing-function: var(--animation-timing-function);*/
   }
 
-  .__title {
+  .title {
     font-size: var(--font-size-5xl);
     font-weight: 700;
     color: var(--colors-text);
   }
 
-  .__details {
+  .details {
     display: flex;
     align-items: center;
     column-gap: 0.5rem;
     justify-content: space-between;
 
-    .__author {
+    .author {
       display: flex;
       align-items: center;
       column-gap: 0.5rem;
       font-weight: 500;
     }
 
-    .__date {
+    .date {
       font-size: var(--font-size-sm);
       font-weight: 500;
       color: var(--colors-text-light);

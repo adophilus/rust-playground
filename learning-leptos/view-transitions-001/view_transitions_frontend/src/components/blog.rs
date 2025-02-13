@@ -1,16 +1,30 @@
 use crate::components::section::{Section, SectionCentral};
 use leptos::{component, document, view, For, IntoView};
-use leptos_router::A;
+use leptos_router::{use_navigate, NavigateOptions};
 use view_transitions_core::model::Blog;
+use wasm_bindgen::{closure::Closure, JsCast};
 
 #[component]
 pub fn BlogTile(blog: Blog) -> impl IntoView {
+    let navigate = use_navigate();
+
     view! {
-        <button on:click=|_| {
-        document().start_view_transition();
-    }>
+        <button on:click={
+            let blog = blog.clone();
+
+            move |_| {
+                let navigate = navigate.clone();
+                let callback = Closure::once_into_js({
+                    let blog = blog.clone();
+                    move || {
+                        navigate(&format!("/{}", blog.id), NavigateOptions::default());
+                    }
+                });
+                let transition = document().start_view_transition_with_update_callback(Some(callback.unchecked_ref())).unwrap();
+            }
+        }>
             <div class="tile" style=format!("--view-transition-name:blog-tile-{}", blog.id)>
-                <img src=blog.image_url class="cover-image" />
+                <img src=blog.image_url class="cover-image" style=format!("--view-transition-name:blog-image-{}", blog.id) / >
                 <span class="overlay">
                     <span class="category"><span>{blog.topic}</span></span>
                     <span class="content">

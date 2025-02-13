@@ -3628,12 +3628,14 @@ dependencies = [
  "console_error_panic_hook",
  "console_log",
  "leptos",
+ "leptos_reactive",
  "leptos_router",
  "log",
  "reqwest",
  "serde",
  "serde_json",
  "view_transitions_core",
+ "wasm-bindgen",
  "web-sys",
 ]
 
