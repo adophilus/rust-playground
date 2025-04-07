@@ -53,14 +53,15 @@
 
             sqlx-cli
 
-            # pkgs.pkgsCross.avr.buildPackages.gcc
-            # avrdude
-            # arduino
+            pkgs.pkgsCross.avr.buildPackages.gcc
+            avrdude
+            arduino
 
             xdotool
           ];
 
           env = {
+            ARDUINO_PATH = "${pkgs.arduino}";
             # Required by rust-analyzer
             RUST_SRC_PATH =
               "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";

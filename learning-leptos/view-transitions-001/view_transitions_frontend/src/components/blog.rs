@@ -14,13 +14,14 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
 
             move |_| {
                 let navigate = navigate.clone();
-                let callback = Closure::once_into_js({
-                    let blog = blog.clone();
-                    move || {
-                        navigate(&format!("/{}", blog.id), NavigateOptions::default());
-                    }
-                });
-                let transition = document().start_view_transition_with_update_callback(Some(callback.unchecked_ref())).unwrap();
+                // let callback = Closure::once_into_js({
+                //     let blog = blog.clone();
+                //     move || {
+                //         navigate(&format!("/{}", blog.id), NavigateOptions::default());
+                //     }
+                // });
+                // let transition = document().start_view_transition_with_update_callback(Some(callback.unchecked_ref())).unwrap();
+                navigate(&format!("/{}", blog.id), NavigateOptions::default());
             }
         }>
             <div class="tile" style=format!("--view-transition-name:blog-tile-{}", blog.id)>

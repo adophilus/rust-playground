@@ -2,8 +2,7 @@ use crate::{
     components::section::{Section, SectionCentral},
     utils,
 };
-use leptos::{component, create_resource, view, IntoView, Params, Show};
-use leptos_reactive::SignalGet;
+use leptos::{component, create_resource, view, IntoView, Params, Show, SignalGet};
 use leptos_router::{use_params, Params};
 use view_transitions_core::model::Blog;
 
@@ -18,6 +17,25 @@ fn BlogContent(blog: Blog) -> impl IntoView {
                         <h1 class="title">{blog.title}</h1>
                         <div class="details">
                             {blog.content}
+                        </div>
+                    </div>
+                </SectionCentral>
+            </Section>
+        </div>
+    }
+}
+
+#[component]
+fn PlaceholderBlogContent(id: usize) -> impl IntoView {
+    view! {
+        <div class="blog-page">
+            <img src="https://via.assets.so/img.jpg?w=400&h=600&tc=#333333&bg=#efefef" class="cover-image" style=format!("--view-transition-name:blog-image-{}", id) />
+            <Section>
+                <SectionCentral>
+                    <div>
+                        <h1 class="title">Title</h1>
+                        <div class="details">
+                            details
                         </div>
                     </div>
                 </SectionCentral>
@@ -46,7 +64,7 @@ pub fn BlogView() -> impl IntoView {
     view! {
         <Show
             when=move || blog.get().is_some()
-            fallback=|| view! {<div>Loading...</div>}
+            fallback=move || view! {<PlaceholderBlogContent id=blog_id />}
         >
             <BlogContent blog=blog.get().unwrap() />
         </Show>
