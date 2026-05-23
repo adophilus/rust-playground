@@ -8,16 +8,10 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
+      let pkgs = nixpkgs.legacyPackages.${system};
+      in {
         devShell = pkgs.mkShell {
-          buildInputs = [
-            pkgs.solana-cli
-            pkgs.anchor
-          ];
+          buildInputs = [ pkgs.solana-cli pkgs.anchor pkgs.bpftools ];
         };
-      }
-    );
+      });
 }

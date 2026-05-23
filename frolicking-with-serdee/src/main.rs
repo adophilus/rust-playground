@@ -1,6 +1,6 @@
 mod lib;
 
-use crate::lib::{parser, paystack, custom};
+use crate::lib::{custom, parser, paystack, serialize_enum};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -43,7 +43,7 @@ fn paystack_parse() {
     dbg!("{:?}", paystack::parse(data));
 }
 
-fn custom_parse () {
+fn custom_parse() {
     let s: &str = r#"{"key":"Qj0vJgdkrZH0rUePP8iLGaJ+5ueCGtejMFuG00bBHjs="}"#;
     let cfg: custom::Config = serde_json::from_str(&s).unwrap();
 
@@ -52,9 +52,17 @@ fn custom_parse () {
     println!("str: {}", j);
 }
 
+fn serialize_enum_parse() {
+    let data = serialize_enum::Human::Man;
+
+    let serialized = data.to_string();
+    println!("serialized: {}", serialized);
+}
+
 fn main() {
     // custom_deserialization();
     // json_value_introspection();
     // paystack_parse();
-    custom_parse();
+    // custom_parse();
+    serialize_enum_parse();
 }

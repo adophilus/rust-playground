@@ -38,7 +38,7 @@ impl Tool for RandomNumberGeneratorTool {
         params: Self::Params,
     ) -> Result<String, Box<(dyn Error + Send + Sync)>> {
         log::debug!("min = {}, max = {}", params.min, params.max);
-        Ok(String::from("1"))
+        Ok(String::from("10"))
     }
 }
 

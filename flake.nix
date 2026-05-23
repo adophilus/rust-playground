@@ -53,9 +53,9 @@
 
             sqlx-cli
 
-            pkgs.pkgsCross.avr.buildPackages.gcc
-            avrdude
-            arduino
+            # pkgs.pkgsCross.avr.buildPackages.gcc
+            # avrdude
+            # arduino
 
             xdotool
           ];

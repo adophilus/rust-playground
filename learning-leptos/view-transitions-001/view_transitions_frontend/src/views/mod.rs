@@ -1,8 +1,8 @@
-mod home;
 mod blog;
+mod home;
 
-use home::HomeView;
 use blog::BlogView;
+use home::HomeView;
 use leptos::{component, view, ErrorBoundary, IntoView};
 use leptos_router::{Route, Router, Routes};
 
@@ -11,11 +11,7 @@ pub fn App() -> impl IntoView {
     view! {
         <ErrorBoundary fallback=|errors| {
             log::error!("An error occurred: {:?}", errors);
-            view! {
-                <div>
-                    Sorry an error occurred
-                </div>
-            }
+            view! { <div>Sorry an error occurred</div> }
         }>
             <Router>
                 <Routes>
@@ -23,7 +19,7 @@ pub fn App() -> impl IntoView {
                     <Route path="/:id" view=BlogView />
                 </Routes>
             </Router>
-            // <HomeView />
+        // <HomeView />
         </ErrorBoundary>
     }
 }

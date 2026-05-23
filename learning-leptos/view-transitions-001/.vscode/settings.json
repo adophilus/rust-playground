@@ -1,0 +1,7 @@
+{
+	"rust-analyzer.rustfmt.overrideCommand": [
+		"/home/adophilus/.cargo/bin/leptosfmt",
+		"--stdin",
+		"--rustfmt"
+	]
+}
