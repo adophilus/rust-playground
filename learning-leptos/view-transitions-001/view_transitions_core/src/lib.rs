@@ -6,10 +6,9 @@ pub mod model {
         pub id: String,
         pub title: String,
         pub content: String,
-        pub link: String,
-        pub image_url: String,
-        pub topic: String,
-        pub info: String,
-        pub preprocessed: String,
+        pub cover_image_url: Option<String>,
+        pub banner_image_url: Option<String>,
+        pub source_link_url: String,
+        pub tags: Vec<String>,
     }
 }

@@ -2,9 +2,8 @@ CREATE TABLE blogs (
   id TEXT PRIMARY KEY NOT NULL,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
-  link TEXT NOT NULL,
-  image_url TEXT NOT NULL,
-  topic TEXT NOT NULL,
-  info TEXT NOT NULL,
-  preprocessed TEXT NOT NULL
+  cover_image_url TEXT,
+  banner_image_url TEXT,
+  source_link_url TEXT NOT NULL,
+  tags TEXT NOT NULL
 ) STRICT;
