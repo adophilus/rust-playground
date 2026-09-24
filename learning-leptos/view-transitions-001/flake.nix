@@ -19,8 +19,8 @@
           pkgs = pkgsFor.${system};
         in
         {
-          default = {
-            packages = [ pkgs.sqlx ];
+          default = pkgs.mkShell {
+            packages = [ pkgs.sqlx-cli ];
           };
         }
       );
