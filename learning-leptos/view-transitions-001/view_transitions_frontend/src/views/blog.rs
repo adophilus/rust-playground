@@ -53,13 +53,10 @@ struct BlogParams {
 pub fn BlogView() -> impl IntoView {
     let params = use_params::<BlogParams>();
     let blog_id = params.get().unwrap().id.unwrap();
-    let blog = create_resource(
-        || (),
-        {
-            let blog_id = blog_id.clone();
-            move |_| async move { utils::get_blog_article(blog_id).await }
-        }
-    );
+    let blog = create_resource(|| (), {
+        let blog_id = blog_id.clone();
+        move |_| async move { utils::get_blog_article(blog_id).await }
+    });
 
     view! {
         <Show
