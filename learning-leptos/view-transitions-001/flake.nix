@@ -1,28 +1,61 @@
 {
-  description = "Nix flake for this project";
+  description = "A Nix-flake-based Rust development environment";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
-    systems.url = "github:nix-systems/default";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs =
-    inputs:
+  outputs = { self, nixpkgs, rust-overlay }:
     let
-      eachSystem = inputs.nixpkgs.lib.attrsets.genAttrs (import inputs.systems);
-      pkgsFor = eachSystem (system: import inputs.nixpkgs { inherit system; });
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ rust-overlay.overlays.default self.overlays.default ];
+        };
+      });
     in
     {
-      devShells = eachSystem (
-        system:
-        let
-          pkgs = pkgsFor.${system};
-        in
-        {
-          default = pkgs.mkShell {
-            packages = [ pkgs.sqlx-cli ];
+      overlays.default = final: prev: {
+        rustToolchain =
+          let
+            rust = prev.rust-bin;
+          in
+          if builtins.pathExists ./rust-toolchain.toml then
+            rust.fromRustupToolchainFile ./rust-toolchain.toml
+          else if builtins.pathExists ./rust-toolchain then
+            rust.fromRustupToolchainFile ./rust-toolchain
+          else
+            rust.stable.latest.default.override {
+              extensions = [ "rust-src" "rustfmt" ];
+            };
+      };
+
+      devShells = forEachSupportedSystem ({ pkgs }: {
+        default = pkgs.mkShell {
+          packages = with pkgs; [
+            rustToolchain
+            openssl
+            pkg-config
+            cargo-deny
+            cargo-edit
+            cargo-watch
+            rust-analyzer
+
+            just
+            sqlx-cli
+            # mitmproxy
+          ];
+
+          env = {
+            # Required by rust-analyzer
+            RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
           };
-        }
-      );
+        };
+      });
     };
 }

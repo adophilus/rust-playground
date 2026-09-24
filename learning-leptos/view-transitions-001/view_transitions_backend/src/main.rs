@@ -17,7 +17,7 @@ async fn main() {
         .get_matches();
 
     let config = Config::new();
-    let db = utils::init_db(&config).await;
+    let database = Database::init(cfg.database.url).await;
     let ctx = Context::from(config, db);
 
     match matches.subcommand() {

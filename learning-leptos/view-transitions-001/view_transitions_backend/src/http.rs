@@ -1,4 +1,3 @@
-use view_transitions_core::model::Blog;
 use axum::{
     extract::{Json, Path, State},
     http::{HeaderValue, StatusCode},
@@ -11,6 +10,7 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
+use view_transitions_core::model::Blog;
 
 use crate::model::Context;
 

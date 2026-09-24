@@ -1,7 +1,7 @@
 use std::env;
 
 use serde::{Deserialize, Serialize};
-use sqlx::sqlite::SqlitePool;
+use view_transitions_core::database::Database;
 
 #[derive(Clone)]
 pub struct AppContext {
@@ -9,14 +9,8 @@ pub struct AppContext {
 }
 
 #[derive(Clone)]
-pub struct DatabaseContext {
-    pub pool: SqlitePool,
-    pub url: String,
-}
-
-#[derive(Clone)]
 pub struct Context {
-    pub db: DatabaseContext,
+    pub db: Database,
     pub app: AppContext,
 }
 
@@ -51,12 +45,9 @@ impl Config {
 }
 
 impl Context {
-    pub fn from(config: Config, pool: SqlitePool) -> Self {
+    pub fn from(config: Config) -> Self {
         Self {
-            db: DatabaseContext {
-                pool,
-                url: config.db.url,
-            },
+            db: Database::init(config.db.url),
             app: AppContext {
                 port: config.app.port,
             },
