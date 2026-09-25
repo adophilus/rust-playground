@@ -1,19 +1,21 @@
-use async_stream::stream::Stream;
+use async_stream::stream;
+use futures_core::stream::Stream;
+use futures_util::{pin_mut,stream::StreamExt};
 use serde::Deserialize;
 use std::env;
 use view_transitions_core::database::Database;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResposePostItemBlog {
     id: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResposePostItemAuthorImage {
     url: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResposePostItemReplies {
     #[serde(rename = "totalItems")]
     total_items: String,
@@ -21,7 +23,7 @@ struct GoogleBloggerApiV3PostsResposePostItemReplies {
     self_link: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResposePostItemAuthor {
     id: String,
     #[serde(rename = "displayName")]
@@ -30,7 +32,7 @@ struct GoogleBloggerApiV3PostsResposePostItemAuthor {
     image: GoogleBloggerApiV3PostsResposePostItemAuthorImage,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResposePostItem {
     kind: String,
     id: String,
@@ -47,7 +49,7 @@ struct GoogleBloggerApiV3PostsResposePostItem {
     etag: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResponse {
     kind: String,
     #[serde(rename = "nextPageToken")]
@@ -65,11 +67,8 @@ impl BlogManager {
         return BlogManager { api_key };
     }
 
-    fn blog(self: &Self, id: String) -> Blog {
-        return Blog {
-            blog_manager: self,
-            id,
-        };
+    fn blog(self: Self, id: String) -> Blog {
+        return Blog::init(self, id);
     }
 }
 
@@ -83,18 +82,16 @@ impl Blog {
         return Blog { blog_manager, id };
     }
 
-    fn posts(self: &Self) -> Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
-        let current_page_token: Option<String> = None;
-        let next_page_token: Option<String> = None;
-        let index: usize = 0;
+    fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
+        let mut next_page_token: Option<String> = None;
+        let mut index: usize = 0;
         let mut blog_posts: Vec<GoogleBloggerApiV3PostsResposePostItem> = Vec::new();
         let client = reqwest::Client::new();
-        let api_key = self.blog_manager.api_key;
 
         return async_stream::stream! {
-            if index == posts.len() - 1 {
-                let query = Vec::new();
-                query.push(("key", self.blog_manager.api_key));
+            if blog_posts.len() == index + 1 {
+                let mut query = Vec::new();
+                query.push(("key", self.blog_manager.api_key.clone()));
 
                 if next_page_token.is_some() {
                     query.push(("pageToken", next_page_token.unwrap()));
@@ -102,16 +99,15 @@ impl Blog {
 
                 let res = client
                     .get(format!(
-                        "https://www.googleapis.com/blogger/v3/blogs/{slef.id}/posts"
+                        "https://www.googleapis.com/blogger/v3/blogs/{}/posts", self.id
                     ))
-                    .query(query)
+                    .query(&query)
                     .send()
                     .await
                     .unwrap()
                     .text()
                     .await
                     .unwrap();
-
 
                 // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
 
@@ -120,8 +116,10 @@ impl Blog {
                 blog_posts.extend_from_slice(parsed.items.as_slice());
             }
 
+            log::debug!("index = {}, blog_posts = {:?}", index, blog_posts);
+
+            yield blog_posts[index].clone();
             index += 1;
-            yield posts[index];
         };
     }
 }
@@ -137,15 +135,18 @@ async fn main() {
 
     let blog_manager = BlogManager::new(blogger_api_key);
     let blog = blog_manager.blog(String::from("2399953"));
-    let posts = blog.posts();
+    let blog_posts = blog.posts();
 
-    let i = 0;
-    for post in posts {
+    let mut i = 0;
+
+    pin_mut!(blog_posts);
+
+    while let post = blog_posts.next().await {
         if i == posts_count {
             break;
         }
 
-        log::debug!(post);
+        log::debug!("{:?}", post);
         i += 1;
     }
 }
