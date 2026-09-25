@@ -55,22 +55,85 @@ struct GoogleBloggerApiV3PostsResponse {
     etag: String,
 }
 
-async fn fetch_blog_posts(
-    blogger_api_key: String,
-    blog_id: String,
-) -> GoogleBloggerApiV3PostsResponse {
-    let res = reqwest::get(format!(
-        "https://www.googleapis.com/blogger/v3/blogs/{blog_id}/posts?key={blogger_api_key}"
-    ))
-    .await
-    .unwrap()
-    .text()
-    .await
-    .unwrap();
+struct BlogManager {
+    api_key: String,
+}
 
-    // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
+impl BlogManager {
+    fn new(api_key: String) -> Self {
+        return BlogManager { api_key };
+    }
 
-    return serde_json::from_str(&res).unwrap();
+    fn blog(self: &Self, id: String) -> Blog {
+        return Blog {
+            blog_manager: Self,
+            id,
+        };
+    }
+}
+
+struct Blog {
+    blog_manager: BlogManager,
+    id: String,
+}
+
+impl Blog {
+    fn init(api_key: String, id: String) -> Self {
+        return Blog { api_key, id };
+    }
+
+    fn posts(self: &Self) -> BlogPostIterator {
+        return BlogPostIterator {
+            blog: self.clone(),
+            current_page_token: None,
+            next_page_token: None,
+            index: 0,
+            posts: Vec::new(),
+        };
+    }
+}
+
+struct BlogPostIterator {
+    blog: Blog,
+    current_page_token: Option<String>,
+    next_page_token: Option<String>,
+    index: u64,
+    posts: Vec<Posts>,
+}
+
+impl Iterator for BlogPostIterator {
+    async fn get_page(
+        self: &mut Self,
+        page_token: Option<String>,
+    ) -> GoogleBloggerApiV3PostsResponse {
+        let client = reqwest::Client::new();
+        let query = Vec::new();
+        query.push(("key", self.api_key));
+
+        if page_token.is_some() {
+            query.push(("pageToken", page_token.unwrap()));
+        }
+
+        let res = client
+            .get(format!(
+                "https://www.googleapis.com/blogger/v3/blogs/{blog_id}/posts"
+            ))
+            .query(query)
+            .send()
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+
+        // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
+
+        return serde_json::from_str(&res).unwrap();
+    }
+
+    fn next() -> Option<Self::Item> {
+        return None;
+    }
 }
 
 #[tokio::main]
@@ -79,6 +142,7 @@ async fn main() {
     let database_url = env::var("DATABASE_URL").unwrap_or(String::from("DATABASE_URL not set"));
     let blogger_api_key =
         env::var("BLOGGER_API_KEY").unwrap_or(String::from("BLOGGER_API_KEY not set"));
+    let posts_count = 100;
     let database = Database::init(database_url).await;
 
     fetch_blog_posts(blogger_api_key, String::from("2399953")).await;
