@@ -1,7 +1,6 @@
 mod http;
 mod migrate;
 mod model;
-mod utils;
 
 use model::{Config, Context};
 
