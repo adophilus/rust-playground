@@ -1,6 +1,6 @@
 use async_stream::stream;
 use futures_core::stream::Stream;
-use futures_util::{pin_mut,stream::StreamExt};
+use futures_util::{pin_mut, stream::StreamExt};
 use serde::Deserialize;
 use std::env;
 use view_transitions_core::database::Database;
@@ -53,7 +53,7 @@ struct GoogleBloggerApiV3PostsResposePostItem {
 struct GoogleBloggerApiV3PostsResponse {
     kind: String,
     #[serde(rename = "nextPageToken")]
-    next_page_token: String,
+    next_page_token: Option<String>,
     items: Vec<GoogleBloggerApiV3PostsResposePostItem>,
     etag: String,
 }
@@ -87,39 +87,52 @@ impl Blog {
         let mut index: usize = 0;
         let mut blog_posts: Vec<GoogleBloggerApiV3PostsResposePostItem> = Vec::new();
         let client = reqwest::Client::new();
+        let mut has_next_page = true;
 
         return async_stream::stream! {
-            if blog_posts.len() == index + 1 {
-                let mut query = Vec::new();
-                query.push(("key", self.blog_manager.api_key.clone()));
-
-                if next_page_token.is_some() {
-                    query.push(("pageToken", next_page_token.unwrap()));
+            while true {
+                if has_next_page == false {
+                    break;
                 }
 
-                let res = client
-                    .get(format!(
-                        "https://www.googleapis.com/blogger/v3/blogs/{}/posts", self.id
-                    ))
-                    .query(&query)
-                    .send()
-                    .await
-                    .unwrap()
-                    .text()
-                    .await
-                    .unwrap();
+                if blog_posts.len() == index {
+                    let mut query = Vec::new();
+                    query.push(("key", self.blog_manager.api_key.clone()));
 
-                // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
+                    if let Some(page_token) = next_page_token {
+                        query.push(("pageToken", page_token));
+                    }
 
-                let parsed = serde_json::from_str::<GoogleBloggerApiV3PostsResponse>(&res).unwrap();
-                next_page_token = Some(parsed.next_page_token);
-                blog_posts.extend_from_slice(parsed.items.as_slice());
+                    let res = client
+                        .get(format!(
+                            "https://www.googleapis.com/blogger/v3/blogs/{}/posts", self.id
+                        ))
+                        .query(&query)
+                        .send()
+                        .await
+                        .unwrap()
+                        .text()
+                        .await
+                        .unwrap();
+
+                    // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
+
+                    let parsed = serde_json::from_str::<GoogleBloggerApiV3PostsResponse>(&res).unwrap();
+
+                    has_next_page = parsed.next_page_token.is_some();
+                    next_page_token = parsed.next_page_token;
+                    blog_posts.extend_from_slice(parsed.items.as_slice());
+
+                    if blog_posts.len() == index {
+                        break;
+                    }
+                }
+
+                log::info!("index = {}, blog_posts = {:?}", index, blog_posts);
+
+                yield blog_posts[index].clone();
+                index += 1;
             }
-
-            log::debug!("index = {}, blog_posts = {:?}", index, blog_posts);
-
-            yield blog_posts[index].clone();
-            index += 1;
         };
     }
 }
@@ -130,7 +143,7 @@ async fn main() {
     let database_url = env::var("DATABASE_URL").unwrap_or(String::from("DATABASE_URL not set"));
     let blogger_api_key =
         env::var("BLOGGER_API_KEY").unwrap_or(String::from("BLOGGER_API_KEY not set"));
-    let posts_count = 100;
+    let posts_count = 10;
     let database = Database::init(database_url).await;
 
     let blog_manager = BlogManager::new(blogger_api_key);
@@ -141,12 +154,14 @@ async fn main() {
 
     pin_mut!(blog_posts);
 
-    while let post = blog_posts.next().await {
+    while let Some(post) = blog_posts.next().await {
         if i == posts_count {
             break;
         }
 
-        log::debug!("{:?}", post);
+        log::info!("This is the post: {:?}", post);
         i += 1;
     }
+
+    log::info!("Done!");
 }
