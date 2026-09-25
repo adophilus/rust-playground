@@ -59,32 +59,36 @@ struct GoogleBloggerApiV3PostsResponse {
 }
 
 struct BlogManager {
+    client: reqwest::Client,
     api_key: String,
 }
 
 impl BlogManager {
     fn new(api_key: String) -> Self {
-        return BlogManager { api_key };
+        let client = reqwest::Client::new();
+
+        return BlogManager { client, api_key };
     }
 
-    fn blog(self: Self, id: String) -> Blog {
+    fn blog(self: &Self, id: String) -> Blog {
         return Blog::init(self, id);
     }
 }
 
-struct Blog {
-    blog_manager: BlogManager,
+struct Blog<'a> {
+    blog_manager: &'a BlogManager,
     id: String,
 }
 
-impl Blog {
-    fn init(blog_manager: BlogManager, id: String) -> Self {
+impl Blog<'_> {
+    fn init(blog_manager: &BlogManager, id: String) -> Self {
         return Blog { blog_manager, id };
     }
 
-    async fn fetch_page(self: &Self, page_token: Option<String>) -> GoogleBloggerApiV3PostsResponse {
-        let client = reqwest::Client::new();
-
+    async fn fetch_page(
+        self: &Self,
+        page_token: Option<String>,
+    ) -> GoogleBloggerApiV3PostsResponse {
         let mut query = Vec::new();
         query.push(("key", self.blog_manager.api_key.clone()));
 
@@ -92,7 +96,9 @@ impl Blog {
             query.push(("pageToken", page_token));
         }
 
-        let res = client
+        let res = self
+            .blog_manager
+            .client
             .get(format!(
                 "https://www.googleapis.com/blogger/v3/blogs/{}/posts",
                 self.id
@@ -111,39 +117,29 @@ impl Blog {
     fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
         let mut next_page_token: Option<String> = None;
         let mut index: usize = 0;
-        let mut blog_posts: Vec<GoogleBloggerApiV3PostsResposePostItem> = Vec::new();
-        let client = reqwest::Client::new();
         let mut has_next_page = true;
 
         return async_stream::stream! {
             while true {
-                if blog_posts.len() == index {
-                    if has_next_page == false {
-                        break;
-                    }
+                let mut query = Vec::new();
+                query.push(("key", self.blog_manager.api_key.clone()));
 
-                    let mut query = Vec::new();
-                    query.push(("key", self.blog_manager.api_key.clone()));
-
-                    if let Some(page_token) = next_page_token.clone() {
-                        query.push(("pageToken", page_token));
-                    }
-
-                    let page = self.fetch_page(next_page_token).await;
-
-                    has_next_page = page.next_page_token.is_some();
-                    next_page_token = page.next_page_token;
-                    blog_posts.extend_from_slice(page.items.as_slice());
-
-                    if blog_posts.len() == index {
-                        break;
-                    }
+                if let Some(page_token) = next_page_token.clone() {
+                    query.push(("pageToken", page_token));
                 }
 
-                log::info!("index = {}, blog_posts = {:?}", index, blog_posts);
+                let page = self.fetch_page(next_page_token).await;
 
-                yield blog_posts[index].clone();
-                index += 1;
+                for post in page.items {
+                    yield post;
+                }
+
+                if let Some(page_token) = page.next_page_token {
+                    next_page_token = Some(page_token);
+                }
+                else {
+                    break;
+                }
             }
         };
     }
