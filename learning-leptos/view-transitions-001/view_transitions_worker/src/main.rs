@@ -81,7 +81,7 @@ struct Blog<'a> {
 }
 
 impl<'a> Blog<'a> {
-    fn init<'a>(blog_manager: &'a BlogManager, id: String) -> Self {
+    fn init(blog_manager: &'a BlogManager, id: String) -> Self {
         return Blog { blog_manager, id };
     }
 

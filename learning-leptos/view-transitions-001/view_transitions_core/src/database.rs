@@ -8,7 +8,7 @@ pub struct Database {
 impl Database {
     pub async fn init(database_url: String) -> Self {
         let conn = SqlitePoolOptions::new()
-            .after_connect(|conn, meta| {
+            .after_connect(|conn, _meta| {
                 Box::pin(async move {
                     conn.execute(
                         "
