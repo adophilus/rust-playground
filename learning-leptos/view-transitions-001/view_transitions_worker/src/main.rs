@@ -80,8 +80,8 @@ struct Blog<'a> {
     id: String,
 }
 
-impl Blog<'_> {
-    fn init(blog_manager: &BlogManager, id: String) -> Self {
+impl<'a> Blog<'a> {
+    fn init<'a>(blog_manager: &'a BlogManager, id: String) -> Self {
         return Blog { blog_manager, id };
     }
 
@@ -116,11 +116,9 @@ impl Blog<'_> {
 
     fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
         let mut next_page_token: Option<String> = None;
-        let mut index: usize = 0;
-        let mut has_next_page = true;
 
         return async_stream::stream! {
-            while true {
+            loop {
                 let mut query = Vec::new();
                 query.push(("key", self.blog_manager.api_key.clone()));
 
@@ -152,7 +150,7 @@ async fn main() {
     let blogger_api_key =
         env::var("BLOGGER_API_KEY").unwrap_or(String::from("BLOGGER_API_KEY not set"));
     let posts_count = 10;
-    let database = Database::init(database_url).await;
+    let _database = Database::init(database_url).await;
 
     let blog_manager = BlogManager::new(blogger_api_key);
     let blog = blog_manager.blog(String::from("2399953"));
