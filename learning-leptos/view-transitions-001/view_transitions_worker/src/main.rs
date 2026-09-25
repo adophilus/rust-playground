@@ -82,6 +82,32 @@ impl Blog {
         return Blog { blog_manager, id };
     }
 
+    async fn fetch_page(self: &Self, page_token: Option<String>) -> GoogleBloggerApiV3PostsResponse {
+        let client = reqwest::Client::new();
+
+        let mut query = Vec::new();
+        query.push(("key", self.blog_manager.api_key.clone()));
+
+        if let Some(page_token) = page_token {
+            query.push(("pageToken", page_token));
+        }
+
+        let res = client
+            .get(format!(
+                "https://www.googleapis.com/blogger/v3/blogs/{}/posts",
+                self.id
+            ))
+            .query(&query)
+            .send()
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+
+        return serde_json::from_str(res.as_str()).unwrap();
+    }
+
     fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
         let mut next_page_token: Option<String> = None;
         let mut index: usize = 0;
@@ -99,29 +125,15 @@ impl Blog {
                     let mut query = Vec::new();
                     query.push(("key", self.blog_manager.api_key.clone()));
 
-                    if let Some(page_token) = next_page_token {
+                    if let Some(page_token) = next_page_token.clone() {
                         query.push(("pageToken", page_token));
                     }
 
-                    let res = client
-                        .get(format!(
-                            "https://www.googleapis.com/blogger/v3/blogs/{}/posts", self.id
-                        ))
-                        .query(&query)
-                        .send()
-                        .await
-                        .unwrap()
-                        .text()
-                        .await
-                        .unwrap();
+                    let page = self.fetch_page(next_page_token).await;
 
-                    // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
-
-                    let parsed = serde_json::from_str::<GoogleBloggerApiV3PostsResponse>(&res).unwrap();
-
-                    has_next_page = parsed.next_page_token.is_some();
-                    next_page_token = parsed.next_page_token;
-                    blog_posts.extend_from_slice(parsed.items.as_slice());
+                    has_next_page = page.next_page_token.is_some();
+                    next_page_token = page.next_page_token;
+                    blog_posts.extend_from_slice(page.items.as_slice());
 
                     if blog_posts.len() == index {
                         break;
