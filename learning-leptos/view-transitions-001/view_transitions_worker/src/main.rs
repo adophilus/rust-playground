@@ -91,11 +91,11 @@ impl Blog {
 
         return async_stream::stream! {
             while true {
-                if has_next_page == false {
-                    break;
-                }
-
                 if blog_posts.len() == index {
+                    if has_next_page == false {
+                        break;
+                    }
+
                     let mut query = Vec::new();
                     query.push(("key", self.blog_manager.api_key.clone()));
 
