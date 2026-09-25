@@ -1,3 +1,4 @@
+use async_stream::stream::Stream;
 use serde::Deserialize;
 use std::env;
 use view_transitions_core::database::Database;
@@ -78,61 +79,50 @@ struct Blog {
 }
 
 impl Blog {
-    fn init(api_key: String, id: String) -> Self {
-        return Blog { api_key, id };
+    fn init(blog_manager: BlogManager, id: String) -> Self {
+        return Blog { blog_manager, id };
     }
 
-    fn posts(self: &Self) -> BlogPostIterator {
-        return BlogPostIterator {
-            blog: self.clone(),
-            current_page_token: None,
-            next_page_token: None,
-            index: 0,
-            posts: Vec::new(),
-        };
-    }
-}
-
-struct BlogPostIterator {
-    blog: Blog,
-    current_page_token: Option<String>,
-    next_page_token: Option<String>,
-    index: u64,
-    posts: Vec<Posts>,
-}
-
-impl Iterator for BlogPostIterator {
-    async fn get_page(
-        self: &mut Self,
-        page_token: Option<String>,
-    ) -> GoogleBloggerApiV3PostsResponse {
+    fn posts(self: &Self) -> Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
+        let current_page_token: Option<String> = None;
+        let next_page_token: Option<String> = None;
+        let index: u64 = 0;
+        let posts: Vec<GoogleBloggerApiV3PostsResposePostItem> = Vec::new();
         let client = reqwest::Client::new();
-        let query = Vec::new();
-        query.push(("key", self.api_key));
+        let api_key = self.blog_manager.api_key;
 
-        if page_token.is_some() {
-            query.push(("pageToken", page_token.unwrap()));
-        }
+        return async_stream::stream! {
+            if index == posts.len() - 1 {
+                let query = Vec::new();
+                query.push(("key", self.api_key));
 
-        let res = client
-            .get(format!(
-                "https://www.googleapis.com/blogger/v3/blogs/{blog_id}/posts"
-            ))
-            .query(query)
-            .send()
-            .await
-            .unwrap()
-            .text()
-            .await
-            .unwrap();
+                if next_page_token.is_some() {
+                    query.push(("pageToken", next_page_token.unwrap()));
+                }
 
-        // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
+                let res = client
+                    .get(format!(
+                        "https://www.googleapis.com/blogger/v3/blogs/{blog_id}/posts"
+                    ))
+                    .query(query)
+                    .send()
+                    .await
+                    .unwrap()
+                    .text()
+                    .await
+                    .unwrap();
 
-        return serde_json::from_str(&res).unwrap();
-    }
 
-    fn next() -> Option<Self::Item> {
-        return None;
+                // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
+
+                let parsed = serde_json::from_str::<GoogleBloggerApiV3PostsResponse>(&res).unwrap();
+                next_page_token = parsed.next_page_token;
+                posts.extend(parsed.items.as_slice());
+            }
+
+            index += 1;
+            yield posts[index];
+        };
     }
 }
 
@@ -145,5 +135,17 @@ async fn main() {
     let posts_count = 100;
     let database = Database::init(database_url).await;
 
-    fetch_blog_posts(blogger_api_key, String::from("2399953")).await;
+    let blog_manager = BlogManager::new(blogger_api_key);
+    let blog = blog_manager.blog(String::from("2399953"));
+    let posts = blog.posts();
+
+    let i = 0;
+    for post in posts {
+        if i == posts_count {
+            break;
+        }
+
+        log::debug!(post);
+        i += 1;
+    }
 }
