@@ -67,7 +67,7 @@ impl BlogManager {
 
     fn blog(self: &Self, id: String) -> Blog {
         return Blog {
-            blog_manager: Self,
+            blog_manager: self,
             id,
         };
     }
@@ -86,15 +86,15 @@ impl Blog {
     fn posts(self: &Self) -> Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
         let current_page_token: Option<String> = None;
         let next_page_token: Option<String> = None;
-        let index: u64 = 0;
-        let posts: Vec<GoogleBloggerApiV3PostsResposePostItem> = Vec::new();
+        let index: usize = 0;
+        let mut blog_posts: Vec<GoogleBloggerApiV3PostsResposePostItem> = Vec::new();
         let client = reqwest::Client::new();
         let api_key = self.blog_manager.api_key;
 
         return async_stream::stream! {
             if index == posts.len() - 1 {
                 let query = Vec::new();
-                query.push(("key", self.api_key));
+                query.push(("key", self.blog_manager.api_key));
 
                 if next_page_token.is_some() {
                     query.push(("pageToken", next_page_token.unwrap()));
@@ -102,7 +102,7 @@ impl Blog {
 
                 let res = client
                     .get(format!(
-                        "https://www.googleapis.com/blogger/v3/blogs/{blog_id}/posts"
+                        "https://www.googleapis.com/blogger/v3/blogs/{slef.id}/posts"
                     ))
                     .query(query)
                     .send()
@@ -116,8 +116,8 @@ impl Blog {
                 // log::debug!("Response from google blogger api v3 pos response endpoint: {res}");
 
                 let parsed = serde_json::from_str::<GoogleBloggerApiV3PostsResponse>(&res).unwrap();
-                next_page_token = parsed.next_page_token;
-                posts.extend(parsed.items.as_slice());
+                next_page_token = Some(parsed.next_page_token);
+                blog_posts.extend_from_slice(parsed.items.as_slice());
             }
 
             index += 1;
