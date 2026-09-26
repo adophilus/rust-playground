@@ -25,10 +25,10 @@ struct GoogleBloggerApiV3PostsResposePostItemReplies {
 
 #[derive(Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResposePostItemAuthor {
-    id: String,
+    id: Option<String>,
     #[serde(rename = "displayName")]
     display_name: String,
-    url: String,
+    url: Option<String>,
     image: GoogleBloggerApiV3PostsResposePostItemAuthorImage,
 }
 
@@ -59,18 +59,21 @@ struct GoogleBloggerApiV3PostsResponse {
 }
 
 struct BlogManager {
-    client: reqwest::Client,
+    base_url: String,
     api_key: String,
+    client: reqwest::Client,
 }
 
 impl BlogManager {
-    fn new(api_key: String) -> Self {
+    fn new(base_url: String, api_key: String) -> Self {
         let client = reqwest::Client::new();
 
-        return BlogManager { client, api_key };
+        return BlogManager { base_url, api_key, client  };
     }
+}
 
-    fn blog(self: &Self, id: String) -> Blog {
+impl<'a> BlogManager {
+    fn blog(self: &'a Self, id: String) -> Blog<'a> {
         return Blog::init(self, id);
     }
 }
@@ -100,7 +103,8 @@ impl<'a> Blog<'a> {
             .blog_manager
             .client
             .get(format!(
-                "https://www.googleapis.com/blogger/v3/blogs/{}/posts",
+                "{}/blogger/v3/blogs/{}/posts",
+                self.blog_manager.base_url,
                 self.id
             ))
             .query(&query)
@@ -146,13 +150,18 @@ impl<'a> Blog<'a> {
 #[tokio::main]
 async fn main() {
     env_logger::init();
+
     let database_url = env::var("DATABASE_URL").unwrap_or(String::from("DATABASE_URL not set"));
+    let blogger_base_url = 
+        env::var("BLOGGER_BASE_URL").unwrap_or(String::from("BLOGGER_BASE_URL not set"));
     let blogger_api_key =
         env::var("BLOGGER_API_KEY").unwrap_or(String::from("BLOGGER_API_KEY not set"));
-    let posts_count = 10;
+
     let _database = Database::init(database_url).await;
 
-    let blog_manager = BlogManager::new(blogger_api_key);
+    let posts_count = 1000;
+
+    let blog_manager = BlogManager::new(blogger_base_url, blogger_api_key);
     let blog = blog_manager.blog(String::from("2399953"));
     let blog_posts = blog.posts();
 
@@ -165,7 +174,6 @@ async fn main() {
             break;
         }
 
-        log::info!("This is the post: {:?}", post);
         i += 1;
     }
 
