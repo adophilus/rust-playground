@@ -6,7 +6,6 @@ pub struct Blog {
     pub title: String,
     pub content: String,
     pub cover_image_url: Option<String>,
-    pub banner_image_url: Option<String>,
-    pub source_link_url: String,
+    pub source_url: String,
     pub tags: Vec<String>,
 }
