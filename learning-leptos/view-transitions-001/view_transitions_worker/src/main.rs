@@ -1,41 +1,41 @@
 use futures_core::stream::Stream;
 use futures_util::{pin_mut, stream::StreamExt};
 use serde::Deserialize;
-use std::{error::Error,env};
+use std::{default::Default, env, error::Error};
 use view_transitions_core::database::Database;
 
-#[derive(Deserialize, Clone, Debug)]
-struct GoogleBloggerApiV3PostsResposePostItemBlog {
+#[derive(Default, Deserialize, Clone, Debug)]
+struct GoogleBloggerApiV3PostsResponsePostItemBlog {
     id: String,
 }
 
-#[derive(Deserialize, Clone, Debug)]
-struct GoogleBloggerApiV3PostsResposePostItemAuthorImage {
+#[derive(Default, Deserialize, Clone, Debug)]
+struct GoogleBloggerApiV3PostsResponsePostItemAuthorImage {
     url: String,
 }
 
-#[derive(Deserialize, Clone, Debug)]
-struct GoogleBloggerApiV3PostsResposePostItemReplies {
+#[derive(Default, Deserialize, Clone, Debug)]
+struct GoogleBloggerApiV3PostsResponsePostItemReplies {
     #[serde(rename = "totalItems")]
     total_items: String,
     #[serde(rename = "selfLink")]
     self_link: String,
 }
 
-#[derive(Deserialize, Clone, Debug)]
-struct GoogleBloggerApiV3PostsResposePostItemAuthor {
+#[derive(Default, Deserialize, Clone, Debug)]
+struct GoogleBloggerApiV3PostsResponsePostItemAuthor {
     id: Option<String>,
     #[serde(rename = "displayName")]
     display_name: String,
     url: Option<String>,
-    image: GoogleBloggerApiV3PostsResposePostItemAuthorImage,
+    image: GoogleBloggerApiV3PostsResponsePostItemAuthorImage,
 }
 
-#[derive(Deserialize, Clone, Debug)]
-struct GoogleBloggerApiV3PostsResposePostItem {
+#[derive(Default, Deserialize, Clone, Debug)]
+struct GoogleBloggerApiV3PostsResponsePostItem {
     kind: String,
     id: String,
-    blog: GoogleBloggerApiV3PostsResposePostItemBlog,
+    blog: GoogleBloggerApiV3PostsResponsePostItemBlog,
     published: String,
     updated: String,
     url: String,
@@ -43,22 +43,18 @@ struct GoogleBloggerApiV3PostsResposePostItem {
     self_link: String,
     title: String,
     content: String,
-    author: GoogleBloggerApiV3PostsResposePostItemAuthor,
-    replies: GoogleBloggerApiV3PostsResposePostItemReplies,
+    author: GoogleBloggerApiV3PostsResponsePostItemAuthor,
+    replies: GoogleBloggerApiV3PostsResponsePostItemReplies,
     etag: String,
 }
 
-#[derive(Deserialize, Clone, Debug)]
+#[derive(Default, Deserialize, Clone, Debug)]
 struct GoogleBloggerApiV3PostsResponse {
     kind: String,
     #[serde(rename = "nextPageToken")]
     next_page_token: Option<String>,
-    items: Vec<GoogleBloggerApiV3PostsResposePostItem>,
+    items: Vec<GoogleBloggerApiV3PostsResponsePostItem>,
     etag: String,
-}
-
-trait BlogManager {
-    fn blog(self: &Self, id: String) -> impl Blog;
 }
 
 struct LiveBlogManager {
@@ -71,27 +67,60 @@ impl LiveBlogManager {
     fn new(base_url: String, api_key: String) -> Self {
         let client = reqwest::Client::new();
 
-        return Self { base_url, api_key, client  };
+        return Self {
+            base_url,
+            api_key,
+            client,
+        };
+    }
+
+    fn blog(&self, id: String) -> impl Blog {
+        return LiveBlog::init(self, id);
     }
 }
 
-impl BlogManager for LiveBlogManager {
-    fn blog(self: &Self, id: String) -> impl Blog {
-        return LiveBlog::init(self.clone(), id);
+struct MockBlogManager {}
+
+impl MockBlogManager {
+    fn new() -> Self {
+        return Self {};
+    }
+
+    fn blog(&self, id: String) -> impl Blog {
+        return MockBlog::init();
     }
 }
 
 trait Blog {
-    fn init(blog_manager: impl BlogManager, id: String) -> Self;
-    fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResposePostItem>;
+    fn posts(&self) -> impl Stream<Item = GoogleBloggerApiV3PostsResponsePostItem>;
 }
 
-struct LiveBlog {
-    blog_manager: LiveBlogManager,
+struct MockBlog {}
+
+impl MockBlog {
+    fn init() -> Self {
+        return Self {};
+    }
+}
+
+impl Blog for MockBlog {
+    fn posts(&self) -> impl Stream<Item = GoogleBloggerApiV3PostsResponsePostItem> {
+        return async_stream::stream! {
+            yield GoogleBloggerApiV3PostsResponsePostItem::default();
+        };
+    }
+}
+
+struct LiveBlog<'a> {
+    blog_manager: &'a LiveBlogManager,
     id: String,
 }
 
-impl LiveBlog {
+impl<'a> LiveBlog<'a> {
+    fn init(blog_manager: &'a LiveBlogManager, id: String) -> Self {
+        return Self { blog_manager, id };
+    }
+
     async fn fetch_page(
         self: &Self,
         page_token: Option<String>,
@@ -108,8 +137,7 @@ impl LiveBlog {
             .client
             .get(format!(
                 "{}/blogger/v3/blogs/{}/posts",
-                self.blog_manager.base_url,
-                self.id
+                self.blog_manager.base_url, self.id
             ))
             .query(&query)
             .send()
@@ -123,12 +151,8 @@ impl LiveBlog {
     }
 }
 
-impl Blog for LiveBlog {
-    fn init(blog_manager: LiveBlogManager, id: String) -> Self {
-        return Self { blog_manager, id };
-    }
-
-    fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResposePostItem> {
+impl<'a> Blog for LiveBlog<'a> {
+    fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResponsePostItem> {
         let mut next_page_token: Option<String> = None;
 
         return async_stream::stream! {
@@ -160,21 +184,24 @@ impl Blog for LiveBlog {
 struct Config {
     database_url: String,
     blogger_base_url: String,
-    blogger_api_key: String
+    blogger_api_key: String,
 }
 
 fn get_config() -> Result<Config, Box<dyn Error>> {
     let database_url = env::var("DATABASE_URL").unwrap_or(String::from("DATABASE_URL not set"));
-    let blogger_base_url = 
-        env::var("BLOGGER_BASE_URL")?; // .unwrap_or(String::from("BLOGGER_BASE_URL not set"));
+    let blogger_base_url = env::var("BLOGGER_BASE_URL")?; // .unwrap_or(String::from("BLOGGER_BASE_URL not set"));
     let blogger_api_key =
         env::var("BLOGGER_API_KEY").unwrap_or(String::from("BLOGGER_API_KEY not set"));
 
-    return Ok(Config { database_url, blogger_base_url, blogger_api_key });
+    return Ok(Config {
+        database_url,
+        blogger_base_url,
+        blogger_api_key,
+    });
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>>{
+async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
 
     let config = get_config()?;
@@ -183,7 +210,8 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     let posts_count = 1;
 
-    let blog_manager = LiveBlogManager::new(config.blogger_base_url, config.blogger_api_key);
+    // let blog_manager = LiveBlogManager::new(config.blogger_base_url, config.blogger_api_key);
+    let blog_manager = MockBlogManager::new();
     let blog = blog_manager.blog(String::from("2399953"));
     let blog_posts = blog.posts();
 
