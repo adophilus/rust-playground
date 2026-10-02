@@ -75,23 +75,23 @@ impl LiveBlogManager {
     }
 }
 
-impl<'a> BlogManager for LiveBlogManager {
+impl BlogManager for LiveBlogManager {
     fn blog(self: &Self, id: String) -> impl Blog {
-        return LiveBlog::init(self, id);
+        return LiveBlog::init(self.clone(), id);
     }
 }
 
 trait Blog {
-    fn init(blog_manager: &impl BlogManager, id: String) -> Self;
+    fn init(blog_manager: impl BlogManager, id: String) -> Self;
     fn posts(self: &Self) -> impl Stream<Item = GoogleBloggerApiV3PostsResposePostItem>;
 }
 
-struct LiveBlog<'a> {
-    blog_manager: &'a LiveBlogManager,
+struct LiveBlog {
+    blog_manager: LiveBlogManager,
     id: String,
 }
 
-impl<'a> LiveBlog<'a> {
+impl LiveBlog {
     async fn fetch_page(
         self: &Self,
         page_token: Option<String>,
@@ -123,8 +123,8 @@ impl<'a> LiveBlog<'a> {
     }
 }
 
-impl<'a> Blog for LiveBlog<'a> {
-    fn init(blog_manager: &LiveBlogManager, id: String) -> Self {
+impl Blog for LiveBlog {
+    fn init(blog_manager: LiveBlogManager, id: String) -> Self {
         return Self { blog_manager, id };
     }
 
@@ -181,7 +181,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     let _database = Database::init(config.database_url).await;
 
-    let posts_count = 10;
+    let posts_count = 1;
 
     let blog_manager = LiveBlogManager::new(config.blogger_base_url, config.blogger_api_key);
     let blog = blog_manager.blog(String::from("2399953"));
