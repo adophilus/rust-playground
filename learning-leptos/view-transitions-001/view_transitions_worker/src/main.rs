@@ -32,7 +32,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             break;
         }
 
-        let blog_post = sqlx::query!("INSERT INTO blogs (id, title, content, cover_image_url, banner_image_url, source_link_url, tags) VALUES (?, ?, ?, ?, ?, ?) RETURNING *").fetch_one(&mut *tx).await?.map(view_transitions_core::model::Blog::into).unwrap();
+        let blog_post = sqlx::query!(
+        "
+        INSERT INTO
+            blogs (id, title, content, cover_image_url, banner_image_url, source_link_url, tags)
+        VALUES
+            (?, ?, ?, ?, ?, ?, ?)
+        RETURNING
+            *
+        "
+    ).fetch_one(&mut *tx).await?.map(view_transitions_core::model::Blog::into).unwrap();
 
         dbg!(blog_post);
 
