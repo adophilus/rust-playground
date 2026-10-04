@@ -1,8 +1,8 @@
 mod model;
 
 use futures_util::{pin_mut, stream::StreamExt};
+use model::{Blog, Config, MockBlogManager};
 use std::error::Error;
-use model::{Config,Blog,MockBlogManager};
 use view_transitions_core::database::Database;
 
 #[tokio::main]
@@ -29,7 +29,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if i == posts_count {
             break;
         }
-
 
         i += 1;
     }

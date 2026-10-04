@@ -1,6 +1,10 @@
 use futures_core::stream::Stream;
 use serde::Deserialize;
-use std::{convert::From, env, fmt::{Display, Formatter}};
+use std::{
+    convert::From,
+    env,
+    fmt::{Debug, Display, Formatter},
+};
 
 const MOCK_POST: &str = r#"
 {
@@ -29,7 +33,6 @@ const MOCK_POST: &str = r#"
   },
   "etag": "\"dGltZXN0YW1wOiAxNTkwMDE5MDk4ODE0Cm9mZnNldDogLTI1MjAwMDAwCg\""
 }"#;
-
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct GoogleBloggerApiV3PostsResponsePostItemBlog {
@@ -123,26 +126,34 @@ pub trait Blog {
 }
 
 fn get_cover_image_url(post: &GoogleBloggerApiV3PostsResponsePostItem) -> Result<String, Error> {
-        let dom = tl::parse(&post.content, tl::ParserOptions::default())?;
-        let parser = dom.parser();
-        let first_img = dom.query_selector("img").ok_or(Error{}).next().ok_or(Error{}).get(parser).ok_or(Error{}).as_tag().ok_or(Error{});
+    let dom = tl::parse(&post.content, tl::ParserOptions::default())?;
+    let parser = dom.parser();
+    let first_img = dom
+        .query_selector("img")
+        .ok_or(Error {})?
+        .next()
+        .ok_or(Error {})?
+        .get(parser)
+        .ok_or(Error {})?
+        .as_tag()
+        .ok_or(Error {})?;
 
-        let attributes = first_img.attributes();
+    let attributes = first_img.attributes();
 
-        let id= attributes.get("id").ok_or(Error{});
+    let src = attributes.get("src").ok_or(Error {})?.ok_or(Error {})?;
 
-        return attributes.get("src").ok_or(Error{});
+    return Ok(src.to_string());
 }
 
-impl From<T> for view_transitions_core::model::Blog where T:GoogleBloggerApiV3PostsResponsePostItem{
-    fn from(value: T) -> Self {
+impl From<GoogleBloggerApiV3PostsResponsePostItem> for view_transitions_core::model::Blog {
+    fn from(value: GoogleBloggerApiV3PostsResponsePostItem) -> Self {
         return Self {
-            id: value.id,
-            title: value.title,
-            content: value.content,
+            id: value.id.clone(),
+            title: value.title.clone(),
+            content: value.content.clone(),
             cover_image_url: get_cover_image_url(&value).ok(),
-            source_url: value.url,
-            tags: Vec::new()
+            source_url: value.url.clone(),
+            tags: Vec::new(),
         };
     }
 }
@@ -156,7 +167,7 @@ impl MockBlog {
 }
 
 impl Blog for MockBlog {
-  fn posts(&self) -> impl Stream<Item = GoogleBloggerApiV3PostsResponsePostItem> {
+    fn posts(&self) -> impl Stream<Item = GoogleBloggerApiV3PostsResponsePostItem> {
         return async_stream::stream! {
             yield serde_json::from_str::<GoogleBloggerApiV3PostsResponsePostItem>(MOCK_POST).unwrap();
         };
@@ -258,15 +269,15 @@ impl Config {
 pub struct Error {}
 
 impl Display for Error {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), std::fmt::Error>{
-        return fmt.write_str("");
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        return Debug::fmt(self, fmt);
     }
 }
 
-impl std::error::Error for Error{}
+impl std::error::Error for Error {}
 
-impl From<T> for Error where T: tl::errors::ParseError {
-    fn from(value: T) -> Self {
+impl From<tl::errors::ParseError> for Error {
+    fn from(value: tl::errors::ParseError) -> Self {
         return Self {};
     }
 }
