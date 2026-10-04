@@ -25,17 +25,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     pin_mut!(blog_posts);
 
+    let mut tx = database.conn.begin().await.unwrap();
+
     while let Some(post) = blog_posts.next().await {
         if i == posts_count {
             break;
         }
 
-        let blog_post = sqlx::query!("INSERT INTO blogs (id, title, content, cover_image_url, banner_image_url, source_link_url, tags) VALUES (?, ?, ?, ?, ?, ?) RETURNING *").fetch_one(&mut database.conn).await?.map(view_transitions_core::model::Blog::into).map_err(|_| model::Error {});
+        let blog_post = sqlx::query!("INSERT INTO blogs (id, title, content, cover_image_url, banner_image_url, source_link_url, tags) VALUES (?, ?, ?, ?, ?, ?) RETURNING *").fetch_one(&mut *tx).await?.map(view_transitions_core::model::Blog::into).unwrap();
 
         dbg!(blog_post);
 
         i += 1;
     }
+
+    tx.commit().await.unwrap();
 
     log::info!("Done!");
 

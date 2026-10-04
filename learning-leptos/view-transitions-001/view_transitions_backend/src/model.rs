@@ -45,9 +45,9 @@ impl Config {
 }
 
 impl Context {
-    pub fn from(config: Config) -> Self {
+    pub async fn init(config: Config) -> Self {
         Self {
-            db: Database::init(config.db.url),
+            db: Database::init(config.db.url).await,
             app: AppContext {
                 port: config.app.port,
             },

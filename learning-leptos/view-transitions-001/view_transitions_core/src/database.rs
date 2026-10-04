@@ -1,6 +1,7 @@
 use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 use sqlx::Executor;
 
+#[derive(Debug, Clone)]
 pub struct Database {
     pub conn: SqlitePool,
 }

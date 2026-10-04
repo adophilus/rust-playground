@@ -16,7 +16,7 @@ use crate::model::Context;
 
 async fn get_articles(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
     let blogs = sqlx::query_as!(Blog, "SELECT * FROM blogs LIMIT 10")
-        .fetch_all(&ctx.db.pool)
+        .fetch_all(&ctx.db.conn)
         .await
         .unwrap();
 
@@ -28,7 +28,7 @@ async fn get_article_by_id(
     Path(id): Path<String>,
 ) -> impl IntoResponse {
     let result = sqlx::query_as!(Blog, "SELECT * FROM blogs WHERE id = $1", id)
-        .fetch_optional(&ctx.db.pool)
+        .fetch_optional(&ctx.db.conn)
         .await
         .unwrap();
 
