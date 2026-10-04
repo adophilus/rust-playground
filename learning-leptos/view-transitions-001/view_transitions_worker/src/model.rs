@@ -142,7 +142,7 @@ fn get_cover_image_url(post: &GoogleBloggerApiV3PostsResponsePostItem) -> Result
 
     let src = attributes.get("src").ok_or(Error {})?.ok_or(Error {})?;
 
-    return Ok(src.to_string());
+    return Ok(String::from(src.as_utf8_str()));
 }
 
 impl From<GoogleBloggerApiV3PostsResponsePostItem> for view_transitions_core::model::Blog {

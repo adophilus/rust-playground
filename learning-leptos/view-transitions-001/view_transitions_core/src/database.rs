@@ -2,7 +2,7 @@ use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 use sqlx::Executor;
 
 pub struct Database {
-    conn: SqlitePool,
+    pub conn: SqlitePool,
 }
 
 impl Database {

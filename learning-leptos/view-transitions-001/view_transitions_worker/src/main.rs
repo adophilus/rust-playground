@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let config = Config::init()?;
 
-    let _database = Database::init(config.database_url).await;
+    let database = Database::init(config.database_url).await;
 
     let posts_count = 1;
 
@@ -29,6 +29,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if i == posts_count {
             break;
         }
+
+        let blog_post = sqlx::query!("INSERT INTO blogs (id, title, content, cover_image_url, banner_image_url, source_link_url, tags) VALUES (?, ?, ?, ?, ?, ?) RETURNING *").fetch_one(&mut database.conn).await?.map(view_transitions_core::model::Blog::into).map_err(|_| model::Error {});
+
+        dbg!(blog_post);
 
         i += 1;
     }
