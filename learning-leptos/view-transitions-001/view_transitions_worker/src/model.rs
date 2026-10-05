@@ -1,5 +1,6 @@
 use futures_core::stream::Stream;
 use serde::Deserialize;
+use view_transitions_core::model::BlogTags;
 use std::{
     convert::From,
     env,
@@ -153,7 +154,7 @@ impl From<GoogleBloggerApiV3PostsResponsePostItem> for view_transitions_core::mo
             content: value.content.clone(),
             cover_image_url: get_cover_image_url(&value).ok(),
             source_url: value.url.clone(),
-            tags: Vec::new(),
+            tags: BlogTags(Vec::new()),
         };
     }
 }
