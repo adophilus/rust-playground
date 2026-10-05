@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         sqlx::query_as!(
             view_transitions_core::model::Blog,
             "
-        INSERT INTO
+        INSERT OR REPLACE INTO
             blogs (id, title, content, cover_image_url, source_url, tags)
         VALUES
             (?, ?, ?, ?, ?, ?)

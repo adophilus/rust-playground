@@ -147,7 +147,7 @@ fn get_cover_image_url(
         .and_then(|mut v| v.next())
         .and_then(|v| v.get(parser))
         .and_then(|v| v.as_tag())
-        .and_then(|v| Some(v.attributes()))
+        .map(|v| v.attributes())
         .and_then(|v| v.get("src"))
         .unwrap_or(None)
         .and_then(|v| v.try_as_utf8_str())
@@ -162,7 +162,7 @@ impl From<GoogleBloggerApiV3PostsResponsePostItem> for view_transitions_core::mo
             id: value.id.clone(),
             title: value.title.clone(),
             content: value.content.clone(),
-            cover_image_url: get_cover_image_url(&value).ok().unwrap_or(None),
+            cover_image_url: get_cover_image_url(&value).unwrap_or(None),
             source_url: value.url.clone(),
             tags: BlogTags(Vec::new()),
         };
@@ -231,13 +231,6 @@ impl<'a> Blog for LiveBlog<'a> {
 
         return async_stream::stream! {
             loop {
-                let mut query = Vec::new();
-                query.push(("key", self.blog_manager.api_key.clone()));
-
-                if let Some(page_token) = next_page_token.clone() {
-                    query.push(("pageToken", page_token));
-                }
-
                 let page = self.fetch_page(next_page_token).await;
 
                 for post in page.items {
@@ -262,11 +255,19 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn init() -> Result<Config, Box<dyn std::error::Error>> {
-        let database_url = env::var("DATABASE_URL").unwrap_or(String::from("DATABASE_URL not set"));
-        let blogger_base_url = env::var("BLOGGER_BASE_URL")?; // .unwrap_or(String::from("BLOGGER_BASE_URL not set"));
-        let blogger_api_key =
-            env::var("BLOGGER_API_KEY").unwrap_or(String::from("BLOGGER_API_KEY not set"));
+    pub fn init() -> Result<Config, Error> {
+        let database_url = env::var("DATABASE_URL").map_err(|err| Error {
+            message: String::from("DATABASE_URL not set"),
+            source: Some(Box::new(err)),
+        })?;
+        let blogger_base_url = env::var("BLOGGER_BASE_URL").map_err(|err| Error {
+            message: String::from("BLOGGER_BASE_URL not set"),
+            source: Some(Box::new(err)),
+        })?;
+        let blogger_api_key = env::var("BLOGGER_API_KEY").map_err(|err| Error {
+            message: String::from("BLOGGER_API_KEY not set"),
+            source: Some(Box::new(err)),
+        })?;
 
         return Ok(Config {
             database_url,
@@ -288,4 +289,8 @@ impl Display for Error {
     }
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        return self.source.as_ref().map(|v| &**v);
+    }
+}
