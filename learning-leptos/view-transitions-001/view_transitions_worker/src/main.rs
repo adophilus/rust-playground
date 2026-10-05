@@ -1,9 +1,9 @@
 mod model;
 
 use futures_util::{pin_mut, stream::StreamExt};
-use model::{Blog, Config, BlogManager, LiveBlogManager};
-use std::error::Error;
+use model::{Blog, BlogManager, Config, LiveBlogManager};
 use serde_json::json;
+use std::error::Error;
 use view_transitions_core::database::Database;
 
 #[tokio::main]
@@ -28,13 +28,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut tx = database.conn.begin().await.unwrap();
 
-    while let Some(post) = blog_posts.next().await && i < posts_count {
+    while let Some(post) = blog_posts.next().await
+        && i < posts_count
+    {
         let blog_post = view_transitions_core::model::Blog::from(post);
         let blog_post_tags = json!(&blog_post.tags);
 
         sqlx::query_as!(
             view_transitions_core::model::Blog,
-        "
+            "
         INSERT INTO
             blogs (id, title, content, cover_image_url, source_url, tags)
         VALUES
@@ -42,8 +44,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         RETURNING
             *
         ",
-        blog_post.id,blog_post.title, blog_post.content, blog_post.cover_image_url, blog_post.source_url, blog_post_tags
-    ).fetch_one(&mut *tx).await?;
+            blog_post.id,
+            blog_post.title,
+            blog_post.content,
+            blog_post.cover_image_url,
+            blog_post.source_url,
+            blog_post_tags
+        )
+        .fetch_one(&mut *tx)
+        .await?;
 
         log::info!("Seeded post {}...", i + 1);
 

@@ -1,11 +1,11 @@
 use futures_core::stream::Stream;
 use serde::Deserialize;
-use view_transitions_core::model::BlogTags;
 use std::{
     convert::From,
     env,
     fmt::{Debug, Display, Formatter},
 };
+use view_transitions_core::model::BlogTags;
 
 const MOCK_POST: &str = r#"
 {
@@ -94,7 +94,6 @@ pub struct LiveBlogManager {
     pub client: reqwest::Client,
 }
 
-
 pub trait BlogManager {
     fn blog(&self, id: String) -> impl Blog;
 }
@@ -135,24 +134,26 @@ pub trait Blog {
     fn posts(&self) -> impl Stream<Item = GoogleBloggerApiV3PostsResponsePostItem>;
 }
 
-fn get_cover_image_url(post: &GoogleBloggerApiV3PostsResponsePostItem) -> Result<String, Error> {
-    let dom = tl::parse(&post.content, tl::ParserOptions::default())?;
+fn get_cover_image_url(
+    post: &GoogleBloggerApiV3PostsResponsePostItem,
+) -> Result<Option<String>, Error> {
+    let dom = tl::parse(&post.content, tl::ParserOptions::default()).map_err(|err| Error {
+        message: String::from("Failed to parse post content"),
+        source: Some(Box::new(err)),
+    })?;
     let parser = dom.parser();
     let first_img = dom
         .query_selector("img")
-        .ok_or(Error {})?
-        .next()
-        .ok_or(Error {})?
-        .get(parser)
-        .ok_or(Error {})?
-        .as_tag()
-        .ok_or(Error {})?;
+        .and_then(|mut v| v.next())
+        .and_then(|v| v.get(parser))
+        .and_then(|v| v.as_tag())
+        .and_then(|v| Some(v.attributes()))
+        .and_then(|v| v.get("src"))
+        .unwrap_or(None)
+        .and_then(|v| v.try_as_utf8_str())
+        .map(|v| String::from(v));
 
-    let attributes = first_img.attributes();
-
-    let src = attributes.get("src").ok_or(Error {})?.ok_or(Error {})?;
-
-    return Ok(String::from(src.as_utf8_str()));
+    return Ok(first_img);
 }
 
 impl From<GoogleBloggerApiV3PostsResponsePostItem> for view_transitions_core::model::Blog {
@@ -161,7 +162,7 @@ impl From<GoogleBloggerApiV3PostsResponsePostItem> for view_transitions_core::mo
             id: value.id.clone(),
             title: value.title.clone(),
             content: value.content.clone(),
-            cover_image_url: get_cover_image_url(&value).ok(),
+            cover_image_url: get_cover_image_url(&value).ok().unwrap_or(None),
             source_url: value.url.clone(),
             tags: BlogTags(Vec::new()),
         };
@@ -276,7 +277,10 @@ impl Config {
 }
 
 #[derive(Debug)]
-pub struct Error {}
+pub struct Error {
+    pub message: String,
+    pub source: Option<Box<dyn std::error::Error>>,
+}
 
 impl Display for Error {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
@@ -285,9 +289,3 @@ impl Display for Error {
 }
 
 impl std::error::Error for Error {}
-
-impl From<tl::errors::ParseError> for Error {
-    fn from(value: tl::errors::ParseError) -> Self {
-        return Self {};
-    }
-}
