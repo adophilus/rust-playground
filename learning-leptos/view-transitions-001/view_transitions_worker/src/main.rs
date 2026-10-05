@@ -1,7 +1,7 @@
 mod model;
 
 use futures_util::{pin_mut, stream::StreamExt};
-use model::{Blog, Config, MockBlogManager};
+use model::{Blog, Config, BlogManager, LiveBlogManager};
 use std::error::Error;
 use serde_json::json;
 use view_transitions_core::database::Database;
@@ -14,12 +14,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let database = Database::init(config.database_url).await;
 
-    let posts_count = 1;
+    let posts_count = 1000;
 
-    // let blog_manager = LiveBlogManager::new(config.blogger_base_url, config.blogger_api_key);
-    let blog_manager = MockBlogManager::new();
-    // let blog = blog_manager.blog(String::from("2399953"));
-    let blog = blog_manager.blog();
+    let blog_manager = LiveBlogManager::new(config.blogger_base_url, config.blogger_api_key);
+    // let blog_manager = MockBlogManager::new();
+    let blog = blog_manager.blog(String::from("2399953"));
+    // let blog = blog_manager.blog();
     let blog_posts = blog.posts();
 
     let mut i = 0;
@@ -28,13 +28,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut tx = database.conn.begin().await.unwrap();
 
-    while let Some(post) = blog_posts.next().await {
-        if i == posts_count {
-            break;
-        }
-
+    while let Some(post) = blog_posts.next().await && i < posts_count {
         let blog_post = view_transitions_core::model::Blog::from(post);
-        let blog_post_tags = blog_post.tags.clone();
+        let blog_post_tags = json!(&blog_post.tags);
 
         sqlx::query_as!(
             view_transitions_core::model::Blog,
@@ -46,10 +42,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         RETURNING
             *
         ",
-        blog_post.id,blog_post.title, blog_post.content, blog_post.cover_image_url, blog_post.source_url, json!(blog_post_tags)
+        blog_post.id,blog_post.title, blog_post.content, blog_post.cover_image_url, blog_post.source_url, blog_post_tags
     ).fetch_one(&mut *tx).await?;
 
-        dbg!(blog_post);
+        log::info!("Seeded post {}...", i + 1);
 
         i += 1;
     }

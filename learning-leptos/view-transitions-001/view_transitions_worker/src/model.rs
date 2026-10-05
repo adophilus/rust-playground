@@ -94,8 +94,13 @@ pub struct LiveBlogManager {
     pub client: reqwest::Client,
 }
 
+
+pub trait BlogManager {
+    fn blog(&self, id: String) -> impl Blog;
+}
+
 impl LiveBlogManager {
-    fn new(base_url: String, api_key: String) -> Self {
+    pub fn new(base_url: String, api_key: String) -> Self {
         let client = reqwest::Client::new();
 
         return Self {
@@ -104,7 +109,9 @@ impl LiveBlogManager {
             client,
         };
     }
+}
 
+impl BlogManager for LiveBlogManager {
     fn blog(&self, id: String) -> impl Blog {
         return LiveBlog::init(self, id);
     }
@@ -116,8 +123,10 @@ impl MockBlogManager {
     pub fn new() -> Self {
         return Self {};
     }
+}
 
-    pub fn blog(&self) -> impl Blog {
+impl BlogManager for MockBlogManager {
+    fn blog(&self, _id: String) -> impl Blog {
         return MockBlog::init();
     }
 }
