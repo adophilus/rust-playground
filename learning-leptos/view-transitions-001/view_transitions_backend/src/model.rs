@@ -54,3 +54,30 @@ impl Context {
         }
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PaginatedMeta {
+    pub total: u64,
+    pub page: u64,
+    pub per_page: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Paginated<T: Clone + std::fmt::Debug> {
+    pub items: Vec<T>,
+    pub meta: PaginatedMeta,
+}
+
+impl<T: Clone + std::fmt::Debug> Paginated<T> {
+    pub fn new(items: Vec<T>, meta: PaginatedMeta) -> Self {
+        return Self { items, meta };
+    }
+}
+
+#[macro_export]
+macro_rules! define_paginated {
+    ($name: ident, $type: ty) => {
+        #[derive(Debug, Clone, Serialize, Deserialize)]
+        struct $name(pub $type);
+    };
+}

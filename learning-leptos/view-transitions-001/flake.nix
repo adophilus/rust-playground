@@ -48,6 +48,7 @@
 
             just
             sqlx-cli
+            leptosfmt
             # mitmproxy
           ];
 

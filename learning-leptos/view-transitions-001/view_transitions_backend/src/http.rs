@@ -12,7 +12,9 @@ use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 use view_transitions_core::model::Blog;
 
-use crate::model::Context;
+use crate::model::{Context, Paginated, PaginatedMeta};
+
+// define_paginated!(PaginatedBlogs, Paginated<Blog>);
 
 async fn get_articles(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
     let blogs = sqlx::query_as!(Blog, "SELECT * FROM blogs LIMIT 10")
