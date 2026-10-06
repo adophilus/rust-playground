@@ -158,12 +158,24 @@ fn get_cover_image_url(
 
 impl From<GoogleBloggerApiV3PostsResponsePostItem> for view_transitions_core::model::Blog {
     fn from(value: GoogleBloggerApiV3PostsResponsePostItem) -> Self {
+        let cover_image_url = match get_cover_image_url(&value) {
+            Ok(v) => v,
+            Err(err) => {
+                log::warn!(
+                    "Error occurred while getting cover image url from blog. err: {:?} blog: {:?}",
+                    err,
+                    &value
+                );
+                None
+            }
+        };
+
         return Self {
-            id: value.id.clone(),
-            title: value.title.clone(),
-            content: value.content.clone(),
-            cover_image_url: get_cover_image_url(&value).unwrap_or(None),
-            source_url: value.url.clone(),
+            id: value.id,
+            title: value.title,
+            content: value.content,
+            cover_image_url,
+            source_url: value.url,
             tags: BlogTags(Vec::new()),
         };
     }
@@ -285,7 +297,7 @@ pub struct Error {
 
 impl Display for Error {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-        return Debug::fmt(self, fmt);
+        return fmt.write_str(self.message.as_ref());
     }
 }
 

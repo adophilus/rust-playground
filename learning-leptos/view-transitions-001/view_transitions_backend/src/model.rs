@@ -76,8 +76,19 @@ impl<T: Clone + std::fmt::Debug> Paginated<T> {
 
 #[macro_export]
 macro_rules! define_paginated {
-    ($name: ident, $type: ty) => {
-        #[derive(Debug, Clone, Serialize, Deserialize)]
-        struct $name(pub $type);
+    ($type: ty) => {
+        paste::paste! {
+            #[derive(Debug, Clone, Serialize, Deserialize)]
+            struct [<Paginated $type>] {
+                items: Vec<$type>,
+                meta: PaginatedMeta,
+            }
+
+            impl std::convert::From<[Paginated $type]> for Paginated<$type> {
+                fn from(value: [<Paginated $type>]) -> Paginated<$type> {
+                    return Paginated::new(value.items, value.meta);
+                }
+            }
+        }
     };
 }

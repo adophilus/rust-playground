@@ -13,6 +13,7 @@ dotenv = "0.15.0"
 env_logger = "0.11.5"
 http = "1.1.0"
 log = "0.4.22"
+paste = "1.0.15"
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
 sqlx = { version = "0.8.2", features = ["runtime-tokio", "sqlite"] }
