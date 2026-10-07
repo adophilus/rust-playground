@@ -9,15 +9,33 @@
     };
   };
 
-  outputs = { self, nixpkgs, rust-overlay }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      rust-overlay,
+    }:
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ rust-overlay.overlays.default self.overlays.default ];
-        };
-      });
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      forEachSupportedSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          f {
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [
+                rust-overlay.overlays.default
+                self.overlays.default
+              ];
+            };
+          }
+        );
     in
     {
       overlays.default = final: prev: {
@@ -30,33 +48,42 @@
           else if builtins.pathExists ./rust-toolchain then
             rust.fromRustupToolchainFile ./rust-toolchain
           else
-            rust.stable.latest.default.override {
-              extensions = [ "rust-src" "rustfmt" ];
+            rust.nightly.latest.default.override {
+              targets = [ "wasm32-unknown-unknown" ];
+              extensions = [
+                "rust-src"
+                "rustfmt"
+              ];
             };
       };
 
-      devShells = forEachSupportedSystem ({ pkgs }: {
-        default = pkgs.mkShell {
-          packages = with pkgs; [
-            rustToolchain
-            openssl
-            pkg-config
-            cargo-deny
-            cargo-edit
-            cargo-watch
-            rust-analyzer
+      devShells = forEachSupportedSystem (
+        { pkgs }:
+        {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              rustToolchain
+              openssl
+              pkg-config
+              cargo-deny
+              cargo-edit
+              cargo-watch
+              cargo-leptos
+              rust-analyzer
 
-            just
-            sqlx-cli
-            leptosfmt
-            # mitmproxy
-          ];
+              trunk
+              just
+              sqlx-cli
+              leptosfmt
+              # mitmproxy
+            ];
 
-          env = {
-            # Required by rust-analyzer
-            RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
+            env = {
+              # Required by rust-analyzer
+              RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
+            };
           };
-        };
-      });
+        }
+      );
     };
 }
