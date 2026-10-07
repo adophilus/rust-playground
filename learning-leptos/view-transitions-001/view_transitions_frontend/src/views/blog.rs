@@ -10,7 +10,7 @@ use view_transitions_core::model::Blog;
 fn BlogContent(blog: Blog) -> impl IntoView {
     view! {
         <div class="blog-page">
-            <img src=blog.image_url class="cover-image" style=format!("--view-transition-name:blog-image-{}", blog.id) />
+            <img src=blog.cover_image_url class="cover-image" style=format!("--view-transition-name:blog-image-{}", blog.id) />
             <Section>
                 <SectionCentral>
                     <div>
