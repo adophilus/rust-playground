@@ -1,11 +1,7 @@
 use futures_core::stream::Stream;
 use serde::Deserialize;
-use std::{
-    convert::From,
-    env,
-    fmt::{Debug, Display, Formatter},
-};
-use view_transitions_core::model::BlogTags;
+use std::{convert::From, env, fmt::Debug};
+use view_transitions_core::model::{BlogTags, Error};
 
 const MOCK_POST: &str = r#"
 {
@@ -286,23 +282,5 @@ impl Config {
             blogger_base_url,
             blogger_api_key,
         });
-    }
-}
-
-#[derive(Debug)]
-pub struct Error {
-    pub message: String,
-    pub source: Option<Box<dyn std::error::Error>>,
-}
-
-impl Display for Error {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-        return fmt.write_str(self.message.as_ref());
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        return self.source.as_ref().map(|v| &**v);
     }
 }

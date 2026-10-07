@@ -1,86 +1,61 @@
+use crate::{
+    model::{Context, PaginationQuery},
+    repo,
+};
 use axum::{
-    extract::{Json, Path, State},
+    extract::{Json, Path, Query, State},
     http::{HeaderValue, StatusCode},
     response::IntoResponse,
     routing::{get, Router},
 };
 use http::Method;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 use view_transitions_core::model::Blog;
 
-use crate::define_paginated;
-use crate::model::{Context, Paginated, PaginatedItems, PaginatedMeta};
+#[derive(Debug)]
+struct Error {
+    message: String,
+    status: StatusCode,
+}
 
-define_paginated!(Blog);
+impl IntoResponse for Error {
+    fn into_response(self) -> axum::response::Response {
+        return (self.status, Json(json!({ "message": self.message }))).into_response();
+    }
+}
 
-async fn get_articles(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
-    let blogs:Paginated<Blog> = sqlx::query_as!(
-        PaginatedBlog,
-        r#"
-        WITH _filtered_items AS (
-            SELECT * FROM blogs
-        ),
-        _windowed_items AS (
-            SELECT * FROM _filtered_items LIMIT 10 OFFSET 0
-        ),
-        _windowed_items_json AS (
-            SELECT
-                JSON_GROUP_ARRAY(
-                    JSON_OBJECT(
-                        'id', id,
-                        'title', title,
-                        'content', content,
-                        'cover_image_url', cover_image_url,
-                        'source_url', source_url,
-                        'tags', JSON(tags)
-                    )
-                ) AS item
-            FROM
-                _windowed_items
-        ),
-        _total_count AS (
-            SELECT COUNT(id) AS total FROM _filtered_items
-        )
-        SELECT
-            -- JSON(COALESCE((SELECT item FROM _windowed_items_json), '[]')) AS "items!", -- "items!: sqlx::types::Json<PaginatedItems<Blog>>",
-            JSON(COALESCE((SELECT item FROM _windowed_items_json), '[]')) AS "items!: sqlx::types::Json<PaginatedItems<Blog>>",
-            JSON_OBJECT(
-                'total', (SELECT total FROM _total_count),
-                'page', 1,
-                'per_page', 10
-            ) AS "meta!: sqlx::types::Json<PaginatedMeta>"
-        FROM
-            _windowed_items
-        "#
-    )
-    .fetch_one(&ctx.db.conn)
-    .await
-    .unwrap().into();
+#[axum::debug_handler]
+async fn get_articles(
+    State(ctx): State<Arc<Context>>,
+    Query(pagination_query): Query<PaginationQuery>,
+) -> impl IntoResponse {
+    let page = pagination_query.page;
+    let per_page = pagination_query.per_page;
 
-    (StatusCode::OK, Json(json!(blogs)))
+    return repo::list_blogs(&ctx.db.conn, page as i32, per_page as i32)
+        .await
+        .map(|v| Json(json!(v)))
+        .map_err(|e| Error {
+            message: e.message,
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+        });
 }
 
 async fn get_article_by_id(
     State(ctx): State<Arc<Context>>,
     Path(id): Path<String>,
 ) -> impl IntoResponse {
-    let result = sqlx::query_as!(Blog, "SELECT * FROM blogs WHERE id = $1", id)
-        .fetch_optional(&ctx.db.conn)
+    return repo::get_blog_by_id(&ctx.db.conn, &id)
         .await
-        .unwrap();
-
-    match result {
-        Some(blog) => (StatusCode::OK, Json(json!(blog))),
-        None => (
-            StatusCode::NOT_FOUND,
-            Json(json!({ "message": "Blog not found!" })),
-        ),
-    }
+        .map(|v| Json(json!(v)))
+        .map_err(|e| Error {
+            message: e.message,
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+        });
 }
 
 pub async fn start_server(ctx: Context) {

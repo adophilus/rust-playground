@@ -55,11 +55,19 @@ impl Context {
     }
 }
 
+#[derive(Deserialize)]
+pub struct PaginationQuery {
+    pub page: u32,
+    pub per_page: u32,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PaginatedMeta {
-    pub total: u64,
-    pub page: u64,
-    pub per_page: u64,
+pub struct PaginatedMeta(pub view_transitions_core::model::PaginatedMeta);
+
+impl std::convert::From<PaginatedMeta> for view_transitions_core::model::PaginatedMeta {
+    fn from(value: PaginatedMeta) -> Self {
+        return value.0;
+    }
 }
 
 impl std::convert::From<sqlx::types::Json<PaginatedMeta>> for PaginatedMeta {
@@ -71,28 +79,11 @@ impl std::convert::From<sqlx::types::Json<PaginatedMeta>> for PaginatedMeta {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PaginatedItems<T: Clone + std::fmt::Debug>(pub Vec<T>);
 
-// impl<T: Clone + std::fmt::Debug + serde::de::DeserializeOwned> std::convert::From<String> for PaginatedItems<T> {
-//     fn from(value: String) -> Self {
-//         dbg!(&value);
-//         return serde_json::from_str(&value).expect("Invalid PaginatedItems string");
-//     }
-// }
-
-impl<T: Clone + std::fmt::Debug> std::convert::From<sqlx::types::Json<PaginatedItems<T>>> for PaginatedItems<T> {
+impl<T: Clone + std::fmt::Debug> std::convert::From<sqlx::types::Json<PaginatedItems<T>>>
+    for PaginatedItems<T>
+{
     fn from(value: sqlx::types::Json<PaginatedItems<T>>) -> Self {
         return value.0;
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Paginated<T: Clone + std::fmt::Debug> {
-    pub items: Vec<T>,
-    pub meta: PaginatedMeta,
-}
-
-impl<T: Clone + std::fmt::Debug> Paginated<T> {
-    pub fn new(items: Vec<T>, meta: PaginatedMeta) -> Self {
-        return Self { items, meta };
     }
 }
 
@@ -102,13 +93,13 @@ macro_rules! define_paginated {
         paste::paste! {
             #[derive(Debug, Clone, Serialize, Deserialize)]
             struct [<Paginated $type>] {
-                items: PaginatedItems<$type>,
-                meta: PaginatedMeta,
+                items: crate::model::PaginatedItems<$type>,
+                meta: crate::model::PaginatedMeta,
             }
 
             impl std::convert::From<[<Paginated $type>]> for Paginated<$type> {
                 fn from(value: [<Paginated $type>]) -> Paginated<$type> {
-                    return Paginated::new(value.items.0, value.meta);
+                    return Paginated::new(value.items.0, value.meta.into());
                 }
             }
         }

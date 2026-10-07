@@ -1,5 +1,8 @@
 mod http;
 mod model;
+mod repo;
+#[cfg(test)]
+mod test;
 
 use model::{Config, Context};
 
