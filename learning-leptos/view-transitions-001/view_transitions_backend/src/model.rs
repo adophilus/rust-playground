@@ -62,6 +62,28 @@ pub struct PaginatedMeta {
     pub per_page: u64,
 }
 
+impl std::convert::From<sqlx::types::Json<PaginatedMeta>> for PaginatedMeta {
+    fn from(value: sqlx::types::Json<PaginatedMeta>) -> Self {
+        return value.0;
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PaginatedItems<T: Clone + std::fmt::Debug>(pub Vec<T>);
+
+// impl<T: Clone + std::fmt::Debug + serde::de::DeserializeOwned> std::convert::From<String> for PaginatedItems<T> {
+//     fn from(value: String) -> Self {
+//         dbg!(&value);
+//         return serde_json::from_str(&value).expect("Invalid PaginatedItems string");
+//     }
+// }
+
+impl<T: Clone + std::fmt::Debug> std::convert::From<sqlx::types::Json<PaginatedItems<T>>> for PaginatedItems<T> {
+    fn from(value: sqlx::types::Json<PaginatedItems<T>>) -> Self {
+        return value.0;
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Paginated<T: Clone + std::fmt::Debug> {
     pub items: Vec<T>,
@@ -80,13 +102,13 @@ macro_rules! define_paginated {
         paste::paste! {
             #[derive(Debug, Clone, Serialize, Deserialize)]
             struct [<Paginated $type>] {
-                items: Vec<$type>,
+                items: PaginatedItems<$type>,
                 meta: PaginatedMeta,
             }
 
-            impl std::convert::From<[Paginated $type]> for Paginated<$type> {
+            impl std::convert::From<[<Paginated $type>]> for Paginated<$type> {
                 fn from(value: [<Paginated $type>]) -> Paginated<$type> {
-                    return Paginated::new(value.items, value.meta);
+                    return Paginated::new(value.items.0, value.meta);
                 }
             }
         }

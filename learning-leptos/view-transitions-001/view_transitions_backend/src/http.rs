@@ -14,14 +14,14 @@ use tower_http::cors::CorsLayer;
 use view_transitions_core::model::Blog;
 
 use crate::define_paginated;
-use crate::model::{Context, Paginated, PaginatedMeta};
+use crate::model::{Context, Paginated, PaginatedItems, PaginatedMeta};
 
 define_paginated!(Blog);
 
 async fn get_articles(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
-    let blogs = sqlx::query_as!(
+    let blogs:Paginated<Blog> = sqlx::query_as!(
         PaginatedBlog,
-        "
+        r#"
         WITH _filtered_items AS (
             SELECT * FROM blogs
         ),
@@ -30,14 +30,14 @@ async fn get_articles(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
         ),
         _windowed_items_json AS (
             SELECT
-                JSONB_GROUP_ARRAY(
-                    JSONB_OBJECT(
+                JSON_GROUP_ARRAY(
+                    JSON_OBJECT(
                         'id', id,
                         'title', title,
                         'content', content,
                         'cover_image_url', cover_image_url,
                         'source_url', source_url,
-                        'tags', tags
+                        'tags', JSON(tags)
                     )
                 ) AS item
             FROM
@@ -47,19 +47,20 @@ async fn get_articles(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
             SELECT COUNT(id) AS total FROM _filtered_items
         )
         SELECT
-            COALESCE((SELECT item FROM _windowed_items_json), JSONB('[]')) AS items,
-            JSONB_OBJECT(
+            -- JSON(COALESCE((SELECT item FROM _windowed_items_json), '[]')) AS "items!", -- "items!: sqlx::types::Json<PaginatedItems<Blog>>",
+            JSON(COALESCE((SELECT item FROM _windowed_items_json), '[]')) AS "items!: sqlx::types::Json<PaginatedItems<Blog>>",
+            JSON_OBJECT(
                 'total', (SELECT total FROM _total_count),
                 'page', 1,
                 'per_page', 10
-            ) AS meta
+            ) AS "meta!: sqlx::types::Json<PaginatedMeta>"
         FROM
             _windowed_items
-        "
+        "#
     )
-    .fetch_all(&ctx.db.conn)
+    .fetch_one(&ctx.db.conn)
     .await
-    .unwrap();
+    .unwrap().into();
 
     (StatusCode::OK, Json(json!(blogs)))
 }
