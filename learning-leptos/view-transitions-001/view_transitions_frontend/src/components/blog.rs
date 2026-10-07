@@ -11,32 +11,30 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
     view! {
         <button on:click={
             let blog = blog.clone();
-
             move |_| {
                 let navigate = navigate.clone();
-                // let callback = Closure::once_into_js({
-                //     let blog = blog.clone();
-                //     move || {
-                //         navigate(&format!("/{}", blog.id), NavigateOptions::default());
-                //     }
-                // });
-                // let transition = document().start_view_transition_with_update_callback(Some(callback.unchecked_ref())).unwrap();
                 navigate(&format!("/{}", blog.id), NavigateOptions::default());
             }
         }>
             <div class="tile" style=format!("--view-transition-name:blog-tile-{}", blog.id)>
-                <img src=blog.image_url class="cover-image" style=format!("--view-transition-name:blog-image-{}", blog.id) / >
+                <img
+                    src=blog.cover_image_url.unwrap_or(String::from("https://placehold.co/500x500"))
+                    class="cover-image"
+                    style=format!("--view-transition-name:blog-image-{}", blog.id)
+                />
                 <span class="overlay">
-                    <span class="category"><span>{blog.topic}</span></span>
+                    <span class="category">
+                        <span>tag</span>
+                    </span>
                     <span class="content">
-                            <span class="title">{blog.title}</span>
-                            <span class="details">
-                                <span class="author">
-                                    <img src="./assets/avatar.jpg" />
-                                    <span>By Jane Doe</span>
-                                </span>
-                                <span class="date">22nd Nov, 2024</span>
+                        <span class="title">{blog.title}</span>
+                        <span class="details">
+                            <span class="author">
+                                <img src="./assets/avatar.jpg" />
+                                <span>By Jane Doe</span>
                             </span>
+                            <span class="date">22nd Nov, 2024</span>
+                        </span>
                     </span>
                 </span>
             </div>

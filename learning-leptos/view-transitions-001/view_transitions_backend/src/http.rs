@@ -13,8 +13,7 @@ use serde_json::json;
 use std::{fmt::Debug, sync::Arc};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
-use tower_http::cors::CorsLayer;
-use view_transitions_core::model::Blog;
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Debug)]
 struct Error {
@@ -65,13 +64,7 @@ pub async fn start_server(ctx: Context) {
     let app = Router::new()
         .route("/api/articles", get(get_articles))
         .route("/api/articles/:id", get(get_article_by_id))
-        .layer(
-            ServiceBuilder::new().layer(
-                CorsLayer::new()
-                    .allow_methods([Method::GET, Method::POST])
-                    .allow_origin("http://127.0.0.1:3000".parse::<HeaderValue>().unwrap()),
-            ),
-        )
+        .layer(ServiceBuilder::new().layer(CorsLayer::new().allow_origin(Any)))
         .with_state(Arc::new(ctx.clone()));
 
     log::info!("App running on port 0.0.0.0:{}", ctx.app.port);

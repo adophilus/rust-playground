@@ -1,7 +1,20 @@
-use view_transitions_core::model::Blog;
+use reqwest::Client;
+use view_transitions_core::model::{Blog, Paginated};
 
-pub async fn get_blog_articles() -> Vec<Blog> {
-    reqwest::get("http://127.0.0.1:8000/api/articles")
+const API_ENDPOINT_URL: &str = "http://localhost:8000";
+
+fn get_client() -> Client {
+    Client::new()
+}
+
+pub async fn get_blog_articles() -> Paginated<Blog> {
+    let query = [("page", 1), ("per_page", 10)];
+
+    let client = get_client();
+    client
+        .get(format!("{}/api/articles", API_ENDPOINT_URL))
+        .query(&query)
+        .send()
         .await
         .expect("Failed to get articles")
         .json()
@@ -10,7 +23,11 @@ pub async fn get_blog_articles() -> Vec<Blog> {
 }
 
 pub async fn get_blog_article(id: usize) -> Blog {
-    reqwest::get(&format!("http://127.0.0.1:8000/api/articles/{}", id))
+    let client = get_client();
+
+    client
+        .get(format!("{}/api/articles/{}", API_ENDPOINT_URL, id))
+        .send()
         .await
         .expect("Failed to get article")
         .json()
