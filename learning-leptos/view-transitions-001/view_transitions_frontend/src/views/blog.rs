@@ -2,7 +2,7 @@ use crate::{
     components::section::{Section, SectionCentral},
     utils,
 };
-use leptos::{component, create_resource, view, IntoView, Params, Show, SignalGet, Transition};
+use leptos::{component, create_resource, view, IntoView, Params, SignalGet, Transition};
 use leptos_router::{use_params, Params};
 use view_transitions_core::model::Blog;
 
