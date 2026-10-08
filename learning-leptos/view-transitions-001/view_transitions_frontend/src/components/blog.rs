@@ -13,13 +13,13 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
             let blog = blog.clone();
             move |_| {
                 let navigate = navigate.clone();
-                // document().
                 navigate(&format!("/{}", blog.id), NavigateOptions::default());
             }
         }>
             <div class="tile" style=format!("--view-transition-name:blog-tile-{}", blog.id)>
                 <img
-                    src=blog.cover_image_url.unwrap_or(String::from("https://placehold.co/500x500"))
+                    // blog.cover_image_url.unwrap_or(String::from("https://placehold.co/500x500"))
+                    src="https://placehold.co/500x500"
                     class="cover-image"
                     style=format!("--view-transition-name:blog-image-{}", blog.id)
                 />

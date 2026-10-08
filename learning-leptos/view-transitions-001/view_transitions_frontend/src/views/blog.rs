@@ -11,15 +11,16 @@ fn BlogContent(blog: Blog) -> impl IntoView {
     view! {
         <div class="blog-page">
             <img
-                src=blog.cover_image_url
+                // blog.cover_image_url
+                src="https://placehold.co/400x600"
                 class="cover-image"
                 style=format!("--view-transition-name:blog-image-{}", blog.id)
             />
             <Section>
                 <SectionCentral>
-                    <div>
-                        <h1 class="title">{blog.title}</h1>
-                        <div class="details">{blog.content}</div>
+                    <div class="blog__container">
+                        <h1 class="blog__title">{blog.title}</h1>
+                        <div class="blog__content" inner_html=blog.content />
                     </div>
                 </SectionCentral>
             </Section>
@@ -66,8 +67,14 @@ pub fn BlogView() -> impl IntoView {
     });
 
     view! {
-        <Transition fallback=move || view! { <BlogContentSkeletonLoader id=blog_id.clone() /> }>
-            <BlogContent blog=blog.get().unwrap() />
+        <Transition fallback=move || {
+            view! { <BlogContentSkeletonLoader id=blog_id.clone() /> }
+        }>
+            {blog
+                .get()
+                .map(|b| {
+                    view! { <BlogContent blog=b /> }
+                })}
         </Transition>
     }
 }
