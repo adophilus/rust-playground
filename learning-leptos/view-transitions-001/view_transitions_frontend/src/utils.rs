@@ -22,15 +22,19 @@ pub async fn get_blog_articles() -> Paginated<Blog> {
         .expect("Failed to decode articles")
 }
 
-pub async fn get_blog_article(id: usize) -> Blog {
+pub async fn get_blog_article_by_id(id: &str) -> Blog {
     let client = get_client();
 
-    client
+    let blog = client
         .get(format!("{}/api/articles/{}", API_ENDPOINT_URL, id))
         .send()
         .await
         .expect("Failed to get article")
         .json()
         .await
-        .expect("Failed to decode article")
+        .expect("Failed to decode article");
+
+    log::debug!("{:?}", blog);
+
+    blog
 }

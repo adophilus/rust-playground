@@ -13,6 +13,7 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
             let blog = blog.clone();
             move |_| {
                 let navigate = navigate.clone();
+                // document().
                 navigate(&format!("/{}", blog.id), NavigateOptions::default());
             }
         }>
