@@ -66,10 +66,7 @@ pub fn BlogView() -> impl IntoView {
     });
 
     view! {
-        <Transition fallback={
-            let blog_id = blog_id.clone();
-            move || view! { <BlogContentSkeletonLoader id=blog_id.clone() /> }
-        }>
+        <Transition fallback=move || view! { <BlogContentSkeletonLoader id=blog_id.clone() /> }>
             <BlogContent blog=blog.get().unwrap() />
         </Transition>
     }
