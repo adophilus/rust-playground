@@ -17,3 +17,5 @@ view_transitions_core = { path = "../view_transitions_core" }
 wasm-bindgen = "0.2.95"
 web-sys = { version = "0.3.70", features = ["Document", "ViewTransition"] }
 
+[build]
+rustflags = ["--cfg=web_sys_unstable_apis"]
