@@ -2,7 +2,7 @@ use crate::components::section::{Section, SectionCentral};
 use leptos::{component, document, view, For, IntoView};
 use leptos_router::{use_navigate, NavigateOptions};
 use view_transitions_core::model::Blog;
-use wasm_bindgen::{closure::Closure, JsCast};
+use web_sys::js_sys::Function;
 
 #[component]
 pub fn BlogTile(blog: Blog) -> impl IntoView {
@@ -13,6 +13,10 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
             let blog = blog.clone();
             move |_| {
                 let navigate = navigate.clone();
+                document()
+                    .start_view_transition_with_update_callback(
+                        // NGL, I'm lost here
+                    );
                 navigate(&format!("/{}", blog.id), NavigateOptions::default());
             }
         }>
