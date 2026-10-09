@@ -9,7 +9,7 @@ use view_transitions_core::model::Blog;
 #[component]
 fn BlogContent(blog: Blog) -> impl IntoView {
     view! {
-        <div class="blog-page">
+        <div class="blog__page">
             <img
                 // blog.cover_image_url
                 src="https://placehold.co/400x600"

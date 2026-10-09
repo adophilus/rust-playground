@@ -9,40 +9,38 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
     let navigate = use_navigate();
 
     view! {
-        <button on:click={
-            let blog = blog.clone();
-            move |_| {
-                let navigate = navigate.clone();
-                document()
-                    .start_view_transition_with_update_callback(
-                        // NGL, I'm lost here
-                    );
-                navigate(&format!("/{}", blog.id), NavigateOptions::default());
+        <button
+            class="blog__tile"
+            style=format!("--view-transition-name:blog-tile-{}", blog.id)
+            on:click={
+                let blog = blog.clone();
+                move |_| {
+                    let navigate = navigate.clone();
+                    navigate(&format!("/{}", blog.id), NavigateOptions::default());
+                }
             }
-        }>
-            <div class="tile" style=format!("--view-transition-name:blog-tile-{}", blog.id)>
-                <img
-                    // blog.cover_image_url.unwrap_or(String::from("https://placehold.co/500x500"))
-                    src="https://placehold.co/500x500"
-                    class="cover-image"
-                    style=format!("--view-transition-name:blog-image-{}", blog.id)
-                />
-                <span class="overlay">
-                    <span class="category">
-                        <span>tag</span>
-                    </span>
-                    <span class="content">
-                        <span class="title">{blog.title}</span>
-                        <span class="details">
-                            <span class="author">
-                                <img src="./assets/avatar.jpg" />
-                                <span>By Jane Doe</span>
-                            </span>
-                            <span class="date">22nd Nov, 2024</span>
+        >
+            <img
+                // blog.cover_image_url.unwrap_or(String::from("https://placehold.co/500x500"))
+                src="https://placehold.co/500x500"
+                class="blog__cover-image"
+                style=format!("--view-transition-name:blog-image-{}", blog.id)
+            />
+            <span class="blog__overlay">
+                <span class="blog__category">
+                    <span>tag</span>
+                </span>
+                <span class="blog__content">
+                    <span class="blog__title">{blog.title}</span>
+                    <span class="blog__details">
+                        <span class="blog__author">
+                            <img src="./assets/avatar.jpg" />
+                            <span>By Jane Doe</span>
                         </span>
+                        <span class="date">22nd Nov, 2024</span>
                     </span>
                 </span>
-            </div>
+            </span>
         </button>
     }
 }
@@ -53,6 +51,7 @@ pub fn BlogArticlesGrid(blogs: Vec<Blog>) -> impl IntoView {
         <Section>
             <SectionCentral>
                 <div class="blog__grid">
+                    <header>A Simple View Transitions Demo</header>
                     <For
                         each=move || blogs.clone()
                         key=|blog| blog.id.clone()
