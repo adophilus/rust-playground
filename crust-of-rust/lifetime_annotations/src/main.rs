@@ -20,6 +20,8 @@ impl<'a> Iterator for StrSplit<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(remainder) = self.remainder {
+            // dbg!(self.remainder); // why is this valid? I thought the if let Some(...) above
+            // moved remainder out of self?
             if let Some(next_delim) = remainder.find(self.delimiter) {
                 let until_delim = &remainder[..next_delim];
                 self.remainder = Some(&remainder[(next_delim + self.delimiter.len())..]);
@@ -35,7 +37,47 @@ impl<'a> Iterator for StrSplit<'a> {
     }
 }
 
-fn main() {}
+#[derive(Debug)]
+struct Person<'a> {
+    name: Option<&'a str>,
+    age: Option<u16>,
+}
+
+fn display_person<'a>(person: Person<'a>) {
+    dbg!(person);
+}
+
+fn display_name(name: &str) {
+    dbg!(name);
+}
+
+fn display_age(age: u16) {
+    dbg!(age);
+}
+
+fn main() {
+    let adophilus = Person {
+        name: Some("Adophilus"),
+        age: Some(22),
+    };
+
+    if let Some(name) = adophilus.name {
+        // How is this possible? I thought once display_person returns, the person variable is dropped
+        // (since display_person owned the person variable)
+        display_person(adophilus);
+        display_name(name);
+        display_name(name);
+    }
+
+    // how Is this possible? I alreadpy gave ownership of the age variable to the display_age fn,
+    // how can I give it out twice
+    // if let Some(age) = adophilus.age {
+    //     display_age(age);
+    //     display_age(age);
+    // }
+
+    // are this posisbel bcos of copy semantics? Is this what copy semantics is?
+}
 
 #[test]
 fn test_that_it_works() {
