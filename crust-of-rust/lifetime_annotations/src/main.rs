@@ -50,3 +50,17 @@ fn test_that_tail_empty_string_is_returned() {
     let letters: Vec<&str> = StrSplit::new(haystack, " ").collect();
     assert_eq!(letters, vec!["a", "b", "c", "d", ""]);
 }
+
+#[test]
+fn test_that_consecutive_empty_strings_are_returned() {
+    let haystack = "a b   c d ";
+    let letters: Vec<&str> = StrSplit::new(haystack, " ").collect();
+    assert_eq!(letters, vec!["a", "b", "", "", "c", "d", ""]);
+}
+
+#[test]
+fn test_that_consecutive_empty_tail_strings_are_returned() {
+    let haystack = "a b c d  ";
+    let letters: Vec<&str> = StrSplit::new(haystack, " ").collect();
+    assert_eq!(letters, vec!["a", "b", "c", "d", "", ""]);
+}
