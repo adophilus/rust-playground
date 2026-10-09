@@ -10,13 +10,14 @@
 		grid-column-start: 1;
 		grid-column-end: -1;
 		text-align: center;
-		font: var(--font-BricolageGrotesque);
+		font-family: var(--font-BricolageGrotesque);
 		font-size: var(--font-size-5xl);
 		font-weight: 600;
 		color: var(--colors-foreground);
 	}
 
 	& > .blog__tile {
+		view-transition-name: var(--view-transition-name);
 		position: relative;
 		border-radius: 1rem;
 		overflow: clip;
@@ -112,7 +113,7 @@
 }
 
 .blog__page {
-	.cover-image {
+	.blog__cover-image {
 		view-transition-name: var(--view-transition-name);
 		display: block;
 		width: 100%;
@@ -138,6 +139,8 @@
 
 	.blog__container {
 		display: grid;
+		grid-column-start: 1;
+		grid-column-end: 13;
 		grid-template-columns: repeat(12, 1fr);
 		column-gap: 2rem;
 		padding-block: 1rem;

@@ -13,7 +13,7 @@ fn BlogContent(blog: Blog) -> impl IntoView {
             <img
                 // blog.cover_image_url
                 src="https://placehold.co/400x600"
-                class="cover-image"
+                class="blog__cover-image"
                 style=format!("--view-transition-name:blog-image-{}", blog.id)
             />
             <Section>

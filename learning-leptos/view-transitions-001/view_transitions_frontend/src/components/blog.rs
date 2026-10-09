@@ -2,21 +2,37 @@ use crate::components::section::{Section, SectionCentral};
 use leptos::{component, document, view, For, IntoView};
 use leptos_router::{use_navigate, NavigateOptions};
 use view_transitions_core::model::Blog;
-use web_sys::js_sys::Function;
+use wasm_bindgen::{JsCast,closure::Closure};
 
 #[component]
 pub fn BlogTile(blog: Blog) -> impl IntoView {
     let navigate = use_navigate();
+    let slot = RefCell::new(None);
 
     view! {
         <button
             class="blog__tile"
-            style=format!("--view-transition-name:blog-tile-{}", blog.id)
+            style=format!("--view-transition-name: blog-tile-{}", blog.id)
             on:click={
                 let blog = blog.clone();
                 move |_| {
                     let navigate = navigate.clone();
-                    navigate(&format!("/{}", blog.id), NavigateOptions::default());
+                        let cb = Closure::<dyn FnMut()>::new(
+                                    || {
+                                            log::debug!("Hello JS");
+                                    //         navigate(
+                                    //     &format!("/{}", blog.id),
+                                    //     NavigateOptions::default(),
+                                    // )
+                                    }
+                                );
+                    document()
+                        .start_view_transition_with_update_callback(
+                            Some(
+                                cb.as_ref().unchecked_ref()
+                            )
+                        );
+                        *slot.borrow_mut() = Some(cb);
                 }
             }
         >
