@@ -55,7 +55,10 @@ body {
 
 .section {
 	display: grid;
-	grid-template-columns: 1fr minmax(auto, 960px) 1fr;
+	grid-template-columns: minmax(1.5rem, 1fr) minmax(auto, 960px) minmax(
+			1.5rem,
+			1fr
+		);
 }
 
 .section__central {

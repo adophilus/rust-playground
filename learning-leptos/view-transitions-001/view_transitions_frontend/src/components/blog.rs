@@ -23,7 +23,7 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
                     let cb = Closure::<
                         dyn FnMut(),
                     >::new(move || {
-                        navigate(blog_id.as_ref(), NavigateOptions::default());
+                        navigate(&format!("/{}", &blog_id), NavigateOptions::default());
                         log::debug!("Hello JS");
                     });
                     let _ = document()
