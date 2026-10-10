@@ -1,8 +1,10 @@
+use std::cell::RefCell;
+
 use crate::components::section::{Section, SectionCentral};
 use leptos::{component, document, view, For, IntoView};
 use leptos_router::{use_navigate, NavigateOptions};
 use view_transitions_core::model::Blog;
-use wasm_bindgen::{JsCast,closure::Closure};
+use wasm_bindgen::{closure::Closure, JsCast};
 
 #[component]
 pub fn BlogTile(blog: Blog) -> impl IntoView {
@@ -17,22 +19,18 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
                 let blog = blog.clone();
                 move |_| {
                     let navigate = navigate.clone();
-                        let cb = Closure::<dyn FnMut()>::new(
-                                    || {
-                                            log::debug!("Hello JS");
-                                    //         navigate(
-                                    //     &format!("/{}", blog.id),
-                                    //     NavigateOptions::default(),
-                                    // )
-                                    }
-                                );
-                    document()
+                    let blog_id = blog.id.clone();
+                    let cb = Closure::<
+                        dyn FnMut(),
+                    >::new(move || {
+                        navigate(blog_id.as_ref(), NavigateOptions::default());
+                        log::debug!("Hello JS");
+                    });
+                    let _ = document()
                         .start_view_transition_with_update_callback(
-                            Some(
-                                cb.as_ref().unchecked_ref()
-                            )
+                            Some(cb.as_ref().unchecked_ref()),
                         );
-                        *slot.borrow_mut() = Some(cb);
+                    *slot.borrow_mut() = Some(cb);
                 }
             }
         >
