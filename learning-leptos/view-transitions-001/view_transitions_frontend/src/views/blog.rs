@@ -56,7 +56,7 @@ struct BlogParams {
     id: Option<String>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 struct BlogQuery(Blog);
 
 impl Params for BlogQuery {
@@ -86,23 +86,25 @@ pub fn BlogView() -> impl IntoView {
     let params = use_params::<BlogParams>();
     let query = use_query::<BlogQuery>();
     let blog_id = params.get().unwrap().id.unwrap();
-    let blog = create_resource(|| (), {
-        let blog_id = blog_id.clone();
-        move |_| {
-            let blog_id = blog_id.clone();
-            async move { utils::get_blog_article_by_id(&blog_id).await }
-        }
-    });
+    // let blog = create_resource(|| (), {
+    //     let blog_id = blog_id.clone();
+    //     move |_| {
+    //         let blog_id = blog_id.clone();
+    //         async move { utils::get_blog_article_by_id(&blog_id).await }
+    //     }
+    // });
+
+    // {blog
+    //     .get()
+    //     .map(|b| {
+    //         view! { <BlogContent blog=b /> }
+    //     })}
 
     view! {
         <Transition fallback=move || {
             view! { <BlogContentSkeletonLoader id=blog_id.clone() /> }
         }>
-            {blog
-                .get()
-                .map(|b| {
-                    view! { <BlogContent blog=b /> }
-                })}
+            <BlogContent blog=query.get().unwrap().0 />
         </Transition>
     }
 }
