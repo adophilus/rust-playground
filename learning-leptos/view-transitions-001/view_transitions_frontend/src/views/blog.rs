@@ -4,7 +4,7 @@ use crate::{
     utils,
 };
 use leptos::{component, create_resource, view, IntoView, Params, SignalGet, Transition};
-use leptos_router::{use_params, Params, ParamsError};
+use leptos_router::{use_params, use_query, Params, ParamsError};
 use std::sync::Arc;
 use view_transitions_core::model::Blog;
 
@@ -56,6 +56,7 @@ struct BlogParams {
     id: Option<String>,
 }
 
+#[derive(Debug, PartialEq)]
 struct BlogQuery(Blog);
 
 impl Params for BlogQuery {
