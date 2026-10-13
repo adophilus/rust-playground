@@ -37,7 +37,7 @@ async fn get_articles(
 
     return repo::list_blogs(&ctx.db.conn, page as i32, per_page as i32)
         .await
-        .map(|v| Json(json!(v)))
+        .map(|v| Json(v))
         .map_err(|e| Error {
             message: e.message,
             status: StatusCode::INTERNAL_SERVER_ERROR,
@@ -50,7 +50,7 @@ async fn get_article_by_id(
 ) -> impl IntoResponse {
     return repo::get_blog_by_id(&ctx.db.conn, &id)
         .await
-        .map(|v| Json(json!(v)))
+        .map(|v| Json(v))
         .map_err(|e| Error {
             message: e.message,
             status: StatusCode::INTERNAL_SERVER_ERROR,

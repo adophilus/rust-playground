@@ -1,9 +1,11 @@
 use crate::{
     components::section::{Section, SectionCentral},
+    model::Error,
     utils,
 };
 use leptos::{component, create_resource, view, IntoView, Params, SignalGet, Transition};
-use leptos_router::{use_params, Params};
+use leptos_router::{use_params, Params, ParamsError};
+use std::sync::Arc;
 use view_transitions_core::model::Blog;
 
 #[component]
@@ -54,9 +56,34 @@ struct BlogParams {
     id: Option<String>,
 }
 
+struct BlogQuery(Blog);
+
+impl Params for BlogQuery {
+    fn from_map(map: &leptos_router::ParamsMap) -> Result<Self, leptos_router::ParamsError> {
+        serde_json::json!(map)
+            .as_str()
+            .map(|v| {
+                serde_json::from_str::<Blog>(v)
+                    .map(|v| Self(v))
+                    .map_err(|e| {
+                        ParamsError::Params(Arc::new(Error {
+                            message: "Invalid query",
+                            source: Some(Box::new(e)),
+                        }))
+                    })
+            })
+            .ok_or(ParamsError::Params(Arc::new(Error {
+                message: "Missing query",
+                source: None,
+            })))
+            .flatten()
+    }
+}
+
 #[component]
 pub fn BlogView() -> impl IntoView {
     let params = use_params::<BlogParams>();
+    let query = use_query::<BlogQuery>();
     let blog_id = params.get().unwrap().id.unwrap();
     let blog = create_resource(|| (), {
         let blog_id = blog_id.clone();
