@@ -1,11 +1,6 @@
-use crate::{
-    components::section::{Section, SectionCentral},
-    model::Error,
-    utils,
-};
+use crate::{components::section::{Section, SectionCentral}, model::BlogQuery};
 use leptos::{component, create_resource, view, IntoView, Params, SignalGet, Transition};
-use leptos_router::{use_params, use_query, Params, ParamsError};
-use std::sync::Arc;
+use leptos_router::{use_params, use_query, Params};
 use view_transitions_core::model::Blog;
 
 #[component]
@@ -54,31 +49,6 @@ fn BlogContentSkeletonLoader(id: String) -> impl IntoView {
 #[derive(Params, PartialEq, Clone, Debug)]
 struct BlogParams {
     id: Option<String>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-struct BlogQuery(Blog);
-
-impl Params for BlogQuery {
-    fn from_map(map: &leptos_router::ParamsMap) -> Result<Self, leptos_router::ParamsError> {
-        serde_json::json!(map)
-            .as_str()
-            .map(|v| {
-                serde_json::from_str::<Blog>(v)
-                    .map(|v| Self(v))
-                    .map_err(|e| {
-                        ParamsError::Params(Arc::new(Error {
-                            message: "Invalid query",
-                            source: Some(Box::new(e)),
-                        }))
-                    })
-            })
-            .ok_or(ParamsError::Params(Arc::new(Error {
-                message: "Missing query",
-                source: None,
-            })))
-            .flatten()
-    }
 }
 
 #[component]

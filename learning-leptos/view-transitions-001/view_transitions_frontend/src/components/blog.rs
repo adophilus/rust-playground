@@ -1,8 +1,11 @@
 use std::cell::RefCell;
 
-use crate::components::section::{Section, SectionCentral};
+use crate::{
+    components::section::{Section, SectionCentral},
+    model::BlogQuery,
+};
 use leptos::{component, document, view, For, IntoView};
-use leptos_router::{use_navigate, NavigateOptions};
+use leptos_router::{use_navigate, NavigateOptions, ParamsMap};
 use view_transitions_core::model::Blog;
 use wasm_bindgen::{closure::Closure, JsCast};
 
@@ -17,6 +20,10 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
             style=format!("--view-transition-name: blog-tile-{}", blog.id)
             on:click={
                 let blog = blog.clone();
+                let blog_query_string = ParamsMap::try_from(BlogQuery(blog.clone()))
+                    .unwrap()
+                    .to_query_string();
+                log::debug!("{}", blog_query_string);
                 move |_| {
                     let navigate = navigate.clone();
                     let blog_id = blog.id.clone();
