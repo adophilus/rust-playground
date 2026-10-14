@@ -23,15 +23,17 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
                 let blog_query_string = ParamsMap::try_from(BlogQuery(blog.clone()))
                     .unwrap()
                     .to_query_string();
-                log::debug!("{}", blog_query_string);
                 move |_| {
                     let navigate = navigate.clone();
                     let blog_id = blog.id.clone();
+                    let blog_query_string = blog_query_string.clone();
                     let cb = Closure::<
                         dyn FnMut(),
                     >::new(move || {
-                        navigate(&format!("/{}", &blog_id), NavigateOptions::default());
-                        log::debug!("Hello JS");
+                        navigate(
+                            &format!("/{}{}", &blog_id, &blog_query_string),
+                            NavigateOptions::default(),
+                        );
                     });
                     let _ = document()
                         .start_view_transition_with_update_callback(

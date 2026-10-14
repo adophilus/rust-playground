@@ -31,25 +31,18 @@ impl TryFrom<BlogQuery> for ParamsMap {
     fn try_from(value: BlogQuery) -> Result<Self, Self::Error> {
         let mut map = ParamsMap::new();
 
-        map.insert("id".to_string(), value.0.id)
-            .ok_or("Failed to insert id into ParamsMap")?;
-        map.insert("title".to_string(), value.0.title)
-            .ok_or("Failed to insert title into ParamsMap")?;
-        map.insert("content".to_string(), value.0.content)
-            .ok_or("Failed to insert content into ParamsMap")?;
+        map.insert("id".to_string(), value.0.id);
+        map.insert("title".to_string(), value.0.title);
+        map.insert("content".to_string(), value.0.content);
         if let Some(cover_image_url) = value.0.cover_image_url {
-            map.insert("cover_image_url".to_string(), cover_image_url)
-                .ok_or("Failed to insert cover_image_url into ParamsMap")?;
+            map.insert("cover_image_url".to_string(), cover_image_url);
         }
-        map.insert("source_url".to_string(), value.0.source_url)
-            .ok_or("Failed to insert source_url into ParamsMap")?;
+        map.insert("source_url".to_string(), value.0.source_url);
         serde_json::to_string(&value.0.tags)
             .map(|v| {
-                map.insert("tags".to_string(), v)
-                    .ok_or("Failed to insert tags into ParamsMap")
+                map.insert("tags".to_string(), v);
             })
-            .map_err(|_| "Failed to insert tags into ParamsMap")
-            .flatten()?;
+            .map_err(|_| "Failed to insert tags into ParamsMap")?;
 
         Ok(map)
     }
