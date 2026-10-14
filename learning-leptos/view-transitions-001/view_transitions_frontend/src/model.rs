@@ -1,7 +1,7 @@
 use leptos_router::{Params, ParamsError, ParamsMap};
 use serde::Serialize;
 use std::sync::Arc;
-use view_transitions_core::model::Blog;
+use view_transitions_core::model::{Blog, BlogTags};
 
 #[derive(Debug)]
 pub struct Error<'a> {
@@ -50,22 +50,50 @@ impl TryFrom<BlogQuery> for ParamsMap {
 
 impl Params for BlogQuery {
     fn from_map(map: &leptos_router::ParamsMap) -> Result<Self, leptos_router::ParamsError> {
-        serde_json::json!(map)
-            .as_str()
+        let id = map.get("id").ok_or(ParamsError::Params(Arc::new(Error {
+            message: "id not in ParamsMap",
+            source: None,
+        })))?;
+        let title = map.get("title").ok_or(ParamsError::Params(Arc::new(Error {
+            message: "title not in ParamsMap",
+            source: None,
+        })))?;
+        let content = map
+            .get("content")
+            .ok_or(ParamsError::Params(Arc::new(Error {
+                message: "content not in ParamsMap",
+                source: None,
+            })))?;
+        let cover_image_url = map.get("cover_image_url").map(|v| v.clone());
+        let source_url = map
+            .get("source_url")
+            .ok_or(ParamsError::Params(Arc::new(Error {
+                message: "source_url not in ParamsMap",
+                source: None,
+            })))?;
+        let tags = map
+            .get("tags")
             .map(|v| {
-                serde_json::from_str::<Blog>(v)
-                    .map(|v| Self(v))
-                    .map_err(|e| {
-                        ParamsError::Params(Arc::new(Error {
-                            message: "Invalid query",
-                            source: Some(Box::new(e)),
-                        }))
-                    })
+                serde_json::from_str::<BlogTags>(v).map_err(|e| {
+                    ParamsError::Params(Arc::new(Error {
+                        message: "invalid tags in ParamsMap",
+                        source: Some(Box::new(e)),
+                    }))
+                })
             })
             .ok_or(ParamsError::Params(Arc::new(Error {
-                message: "Missing query",
+                message: "tags not in ParamsMap",
                 source: None,
             })))
-            .flatten()
+            .flatten()?;
+
+        Ok(Self(Blog {
+            id: id.clone(),
+            title: title.clone(),
+            content: content.clone(),
+            cover_image_url,
+            source_url: source_url.clone(),
+            tags: tags.clone(),
+        }))
     }
 }
