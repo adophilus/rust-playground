@@ -1,4 +1,7 @@
-use crate::{components::section::{Section, SectionCentral}, model::BlogQuery};
+use crate::{
+    components::section::{Section, SectionCentral},
+    model::BlogQuery,
+};
 use leptos::{component, create_resource, view, IntoView, Params, SignalGet, Transition};
 use leptos_router::{use_params, use_query, Params};
 use view_transitions_core::model::Blog;
@@ -11,7 +14,7 @@ fn BlogContent(blog: Blog) -> impl IntoView {
                 // blog.cover_image_url
                 src="https://placehold.co/400x600"
                 class="blog__cover-image"
-                style=format!("--view-transition-name:blog-image-{}", blog.id)
+                style=format!("--view-transition-name: blog-image-{}", blog.id)
             />
             <Section>
                 <SectionCentral>
@@ -70,11 +73,5 @@ pub fn BlogView() -> impl IntoView {
     //         view! { <BlogContent blog=b /> }
     //     })}
 
-    view! {
-        <Transition fallback=move || {
-            view! { <BlogContentSkeletonLoader id=blog_id.clone() /> }
-        }>
-            <BlogContent blog=query.get().unwrap().0 />
-        </Transition>
-    }
+    view! { <BlogContent blog=query.get().unwrap().0 /> }
 }
