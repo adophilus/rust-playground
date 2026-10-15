@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::{cell::RefCell, time::Duration};
 
 use crate::{
     components::section::{Section, SectionCentral},
@@ -11,12 +11,14 @@ use view_transitions_core::model::Blog;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use wasm_bindgen_futures::{future_to_promise, JsFuture};
 
-fn next_frame() -> Promise {
+fn next_tick() -> Promise {
     Promise::new(&mut |resolve, reject| {
         let resolve = resolve.clone();
-        leptos::request_animation_frame(move || {
+        let cb = move || {
             resolve.call0(&JsValue::UNDEFINED);
-        });
+        };
+        // leptos::request_animation_frame(cb);
+        leptos::set_timeout(cb, Duration::from_millis(16));
     })
 }
 
@@ -33,7 +35,7 @@ async fn wait_for_view(selector: &str, timeout_ms: f64) {
         } else if js_sys::Date::now() - start >= timeout_ms {
             return ();
         }
-        JsFuture::from(next_frame()).await;
+        JsFuture::from(next_tick()).await;
     }
 }
 
