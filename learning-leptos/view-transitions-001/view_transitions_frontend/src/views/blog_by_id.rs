@@ -55,7 +55,7 @@ struct BlogParams {
 }
 
 #[component]
-pub fn BlogView() -> impl IntoView {
+pub fn BlogByIdView() -> impl IntoView {
     let params = use_params::<BlogParams>();
     let query = use_query::<BlogQuery>();
     let blog_id = params.get().unwrap().id.unwrap();

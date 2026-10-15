@@ -3,7 +3,7 @@ use crate::utils;
 use leptos::{component, create_resource, view, IntoView, Show, SignalGet};
 
 #[component]
-pub fn HomeView() -> impl IntoView {
+pub fn BlogsView() -> impl IntoView {
     let blogs_resource =
         create_resource(|| (), |_| async move { utils::get_blog_articles().await });
 

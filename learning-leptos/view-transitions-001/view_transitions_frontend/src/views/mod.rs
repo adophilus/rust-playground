@@ -1,2 +1,2 @@
-pub mod blog;
-pub mod home;
+pub mod blog_by_id;
+pub mod blogs;
