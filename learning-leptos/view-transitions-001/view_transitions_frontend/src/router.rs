@@ -1,4 +1,4 @@
-use crate::views::{blog::BlogView, home::HomeView};
+use crate::views;
 use leptos::{component, ev, view, window, window_event_listener, ErrorBoundary, IntoView};
 use leptos_router::{use_navigate, NavigateOptions};
 
@@ -34,8 +34,8 @@ pub fn Router() -> impl IntoView {
             <leptos_router::Router>
                 <PopstateFix />
                 <leptos_router::Routes>
-                    <leptos_router::Route path="" view=HomeView />
-                    <leptos_router::Route path=":id" view=BlogView />
+                    <leptos_router::Route path="" view=views::blogs::BlogsView />
+                    <leptos_router::Route path=":id" view=views::blog_by_id::BlogByIdView />
                 </leptos_router::Routes>
             </leptos_router::Router>
         </ErrorBoundary>

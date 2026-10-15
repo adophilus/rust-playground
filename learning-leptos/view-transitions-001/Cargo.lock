@@ -4263,6 +4263,7 @@ dependencies = [
  "serde_json",
  "view_transitions_core",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 

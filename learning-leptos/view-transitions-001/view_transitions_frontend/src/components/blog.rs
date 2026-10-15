@@ -4,10 +4,38 @@ use crate::{
     components::section::{Section, SectionCentral},
     model::BlogQuery,
 };
+use js_sys::Promise;
 use leptos::{component, document, view, For, IntoView};
 use leptos_router::{use_navigate, NavigateOptions, ParamsMap};
 use view_transitions_core::model::Blog;
-use wasm_bindgen::{closure::Closure, JsCast};
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
+use wasm_bindgen_futures::{future_to_promise, JsFuture};
+
+fn next_frame() -> Promise {
+    Promise::new(&mut |resolve, reject| {
+        let resolve = resolve.clone();
+        leptos::request_animation_frame(move || {
+            resolve.call0(&JsValue::UNDEFINED);
+        });
+    })
+}
+
+async fn wait_for_view(selector: &str, timeout_ms: f64) {
+    let start = js_sys::Date::now();
+
+    loop {
+        if leptos::document()
+            .query_selector(selector)
+            .expect("no querySelector")
+            .is_some()
+        {
+            return ();
+        } else if js_sys::Date::now() - start >= timeout_ms {
+            return ();
+        }
+        JsFuture::from(next_frame()).await;
+    }
+}
 
 #[component]
 pub fn BlogTile(blog: Blog) -> impl IntoView {
@@ -28,12 +56,16 @@ pub fn BlogTile(blog: Blog) -> impl IntoView {
                     let blog_id = blog.id.clone();
                     let blog_query_string = blog_query_string.clone();
                     let cb = Closure::<
-                        dyn FnMut(),
+                        dyn FnMut() -> Promise,
                     >::new(move || {
                         navigate(
                             &format!("/{}{}", &blog_id, &blog_query_string),
                             NavigateOptions::default(),
                         );
+                        future_to_promise(async {
+                            wait_for_view(".blog__page .blog__cover-image",2000.0).await;
+                            Ok(JsValue::UNDEFINED)
+                        })
                     });
                     let _ = document()
                         .start_view_transition_with_update_callback(
