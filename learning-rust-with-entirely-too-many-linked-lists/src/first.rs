@@ -1,3 +1,6 @@
+use std::cell::{Ref, RefCell};
+use std::ops::Deref;
+
 #[derive(Debug)]
 struct List {
     head: Link,
@@ -25,15 +28,21 @@ impl List {
     }
 
     fn pop(&mut self) -> Option<i32> {
-        let mut link = &mut self.head;
+        let link = RefCell::new(&mut self.head);
+        // let mut link = &mut self.head;
 
-        if let Link::Empty = link {
+        // NGL I'm stumped at this point...
+        if let Ref {
+            value: NonNull(Link::Empty),
+            ..
+        } = link.borrow()
+        {
             return None;
         }
 
-        let mut prev_link = link;
+        let mut prev_link = link.borrow_mut();
 
-        while let Link::More(node) = link {
+        while let Link::More(node) = *link.borrow() {
             if let Link::Empty = node.next {
                 match prev_link {
                     Link::Empty => unreachable!(),
@@ -46,8 +55,8 @@ impl List {
                     }
                 };
             }
-            prev_link = link;
-            link = &mut node.next;
+            prev_link = *link.borrow();
+            link.replace(&mut node.next);
         }
 
         return None;
