@@ -1,6 +1,3 @@
-use std::cell::{Ref, RefCell};
-use std::ops::Deref;
-
 #[derive(Debug)]
 struct List {
     head: Link,
@@ -28,35 +25,42 @@ impl List {
     }
 
     fn pop(&mut self) -> Option<i32> {
-        let link = RefCell::new(&mut self.head);
-        // let mut link = &mut self.head;
+        let mut link = &mut self.head;
 
-        // NGL I'm stumped at this point...
-        if let Ref {
-            value: NonNull(Link::Empty),
-            ..
-        } = link.borrow()
-        {
-            return None;
-        }
-
-        let mut prev_link = link.borrow_mut();
-
-        while let Link::More(node) = *link.borrow() {
-            if let Link::Empty = node.next {
-                match prev_link {
-                    Link::Empty => unreachable!(),
-                    Link::More(node) => {
-                        let _link = std::mem::replace(&mut node.next, Link::Empty);
-                        match _link {
-                            Link::Empty => unreachable!(),
-                            Link::More(_node) => return Some(_node.value),
+        match &link {
+            Link::Empty => return None,
+            Link::More(node) => match node.next {
+                Link::Empty => {
+                    match link {
+                        Link::Empty => unreachable!(),
+                        Link::More(_node) => {
+                            node.next = _node.next;
                         }
+                    };
+                    return Some(node.value);
+                }
+                _ => (),
+            },
+        };
+
+        loop {
+            match link {
+                Link::Empty => unreachable!(),
+                Link::More(node) => match node.next {
+                    Link::Empty => {
+                        match link {
+                            Link::Empty => unreachable!(),
+                            Link::More(_node) => {
+                                node.next = _node.next;
+                            }
+                        };
+                        return Some(node.value);
                     }
-                };
+                    Link::More(_node) => {
+                        link = &mut node.next;
+                    }
+                },
             }
-            prev_link = *link.borrow();
-            link.replace(&mut node.next);
         }
 
         return None;
