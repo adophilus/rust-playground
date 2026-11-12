@@ -8,62 +8,35 @@ impl List {
         Self { head: Link::Empty }
     }
 
-    fn push(&mut self, elem: i32) {
-        let mut link = &mut self.head;
-        let new_link = Link::More(Box::new(Node::new(elem, Link::Empty)));
-        loop {
-            match link {
-                Link::Empty => {
-                    let _ = std::mem::replace(link, new_link);
-                    break;
-                }
-                Link::More(node) => {
-                    link = &mut node.next;
-                }
-            }
-        }
+    fn push(&mut self, value: i32) {
+        // let new_node = Box::new(Node::new(
+        //     value,
+        //     std::mem::replace(&mut self.head, Link::Empty),
+        // ));
+        // self.head = Link::More(new_node);
+
+        let old_head = std::mem::replace(&mut self.head, Link::Empty);
+        let new_node = Node::new(value, old_head);
+        self.head = Link::More(Box::new(new_node));
     }
 
     fn pop(&mut self) -> Option<i32> {
-        let mut link = &mut self.head;
-
-        match &link {
-            Link::Empty => return None,
-            Link::More(node) => match node.next {
-                Link::Empty => {
-                    match link {
-                        Link::Empty => unreachable!(),
-                        Link::More(_node) => {
-                            node.next = _node.next;
-                        }
-                    };
-                    return Some(node.value);
-                }
-                _ => (),
-            },
-        };
-
-        loop {
-            match link {
-                Link::Empty => unreachable!(),
-                Link::More(node) => match node.next {
-                    Link::Empty => {
-                        match link {
-                            Link::Empty => unreachable!(),
-                            Link::More(_node) => {
-                                node.next = _node.next;
-                            }
-                        };
-                        return Some(node.value);
-                    }
-                    Link::More(_node) => {
-                        link = &mut node.next;
-                    }
-                },
+        // // why does this work?
+        match std::mem::replace(&mut self.head, Link::Empty) {
+            Link::Empty => None,
+            Link::More(node) => {
+                self.head = node.next;
+                Some(node.value)
             }
         }
 
-        return None;
+        // // but this doesn't
+        // let node = match &self.head {
+        //     Link::Empty => return None,
+        //     Link::More(node) => node,
+        // };
+        // self.head = node.next;
+        // Some(node.value)
     }
 }
 
