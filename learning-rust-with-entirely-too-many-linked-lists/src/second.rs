@@ -96,17 +96,6 @@ impl<T> Node<T> {
     }
 }
 
-pub fn main() {
-    let mut list = List::new();
-    list.push(1);
-    list.push(2);
-    list.push(3);
-    dbg!(&list);
-
-    list.pop();
-    dbg!(&list);
-}
-
 #[cfg(test)]
 mod test {
     use super::List;
