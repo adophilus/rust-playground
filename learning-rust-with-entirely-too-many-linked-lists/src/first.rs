@@ -67,7 +67,7 @@ impl Node {
     }
 }
 
-pub fn first() {
+pub fn main() {
     let mut list = List::new();
     list.push(1);
     list.push(2);
