@@ -1,3 +1,5 @@
+use std::ops::DerefMut;
+
 #[derive(Debug)]
 struct List<T> {
     head: Link<T>,
@@ -9,6 +11,11 @@ struct IntoIter<T>(List<T>);
 #[derive(Debug)]
 struct Iter<'a, T> {
     node: Option<&'a Node<T>>,
+}
+
+#[derive(Debug)]
+struct IterMut<'a, T> {
+    node: Option<&'a mut Node<T>>,
 }
 
 type Link<T> = Option<Box<Node<T>>>;
@@ -31,6 +38,12 @@ impl<T> List<T> {
     fn iter(&self) -> Iter<'_, T> {
         Iter {
             node: self.head.as_ref().map(|node| node.as_ref()),
+        }
+    }
+
+    fn iter_mut(&mut self) -> IterMut<'_, T> {
+        IterMut {
+            node: self.head.as_mut().map(|node| node.as_mut()),
         }
     }
 
@@ -80,13 +93,36 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let node = self.node;
+        self.node.map(|node| {
+            self.node = node.next.as_deref();
+            &node.value
+        })
+    }
+}
 
-        self.node = self
-            .node
-            .and_then(|node| node.next.as_ref().map(|node| node.as_ref()));
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
 
-        node.map(|node| &node.value)
+    fn next(&mut self) -> Option<Self::Item> {
+        // // This doesn't work
+        // let mut old_node_value: Option<&mut T> = None;
+        // std::mem::replace(
+        //     &mut self.node,
+        //     self.node
+        //         .as_ref()
+        //         .map(|node| {
+        //             old_node_value = Some(&mut node.value);
+        //             node.next.as_mut().map(|node| node.deref_mut())
+        //         })
+        //         .flatten(),
+        // );
+        //
+        // old_node_value
+
+        self.node.take().map(|node| {
+            self.node = node.next.as_deref_mut();
+            &mut node.value
+        })
     }
 }
 
@@ -107,7 +143,7 @@ mod test {
         // check empty list behaves right
         assert_eq!(list1.pop(), None);
 
-        // pupulate list
+        // populate list
         list1.push(1);
         list1.push(2);
         list1.push(3);
@@ -177,5 +213,18 @@ mod test {
         assert_eq!(iter.next(), None);
 
         assert_eq!(list.peek(), Some(&3));
+    }
+
+    #[test]
+    fn iter_mut() {
+        let mut list = List::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+
+        let mut iter = list.iter_mut();
+        assert_eq!(iter.next(), Some(&mut 3));
+        assert_eq!(iter.next(), Some(&mut 2));
+        assert_eq!(iter.next(), Some(&mut 1));
     }
 }
